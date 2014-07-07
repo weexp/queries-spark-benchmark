@@ -10,7 +10,7 @@
 
 
     <properties>
-        <deep.version>0.2.5</deep.version>
+        <deep.version>0.3.3</deep.version>
     </properties>
 
     <licenses>
@@ -53,6 +53,16 @@
             <artifactId>sigar</artifactId>
             <version>1.6.4</version>
         </dependency>
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-server</artifactId>
+			<version>0.98.3-hadoop2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-yarn-client</artifactId>
+			<version>2.2.0</version>
+		</dependency>
 
 
 
