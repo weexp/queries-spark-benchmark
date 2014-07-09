@@ -3,6 +3,7 @@ package com.stratio.deep.benchmark.hbase.spark;
 import java.io.File;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat;
 import org.apache.spark.SparkConf;
@@ -48,21 +49,19 @@ public class HbaseDriver {
         SparkConf sparkConf = new SparkConf()
                 .set("spark.executor.memory", "8g");
         context = new DeepSparkContext(new SparkContext(sparkMaster,
-                "Hbase com.stratio.deep.benchmark", sparkConf));
+                "Benchmark", sparkConf));
         String path = new File(HbaseDriver.class.getProtectionDomain()
                 .getCodeSource().getLocation().getPath()).getAbsolutePath();
 
         context.addJar(path);
 
-        JavaPairRDD<ImmutableBytesWritable, org.apache.hadoop.hbase.client.Result> revisionRDD = context
+        JavaPairRDD<ImmutableBytesWritable, Result> revisionRDD = context
                 .newAPIHadoopRDD(confRevision, TableInputFormat.class,
-                        ImmutableBytesWritable.class,
-                        org.apache.hadoop.hbase.client.Result.class);
+                        ImmutableBytesWritable.class, Result.class);
 
-        JavaPairRDD<ImmutableBytesWritable, org.apache.hadoop.hbase.client.Result> pageCountsRDD = context
+        JavaPairRDD<ImmutableBytesWritable, Result> pageCountsRDD = context
                 .newAPIHadoopRDD(confPageCount, TableInputFormat.class,
-                        ImmutableBytesWritable.class,
-                        org.apache.hadoop.hbase.client.Result.class);
+                        ImmutableBytesWritable.class, Result.class);
         long initTime = System.currentTimeMillis();
         JavaPairRDD<String, Tuple2<ResultSerializable, ResultSerializable>> joinTestRDD = pageCountsRDD
                 .mapToPair(new MapPageCountFunction()).join(
@@ -75,10 +74,11 @@ public class HbaseDriver {
 
         initTime = System.currentTimeMillis();
 
-        JavaPairRDD<ImmutableBytesWritable, org.apache.hadoop.hbase.client.Result> pageRddFilter = pageCountsRDD
+        JavaPairRDD<ImmutableBytesWritable, Result> pageRddFilter = pageCountsRDD
                 .filter(new FunctionFilterSpark());
         long count = pageRddFilter.count();
         endTime = System.currentTimeMillis();
+
         logger.info("Filter used Hbase with Spark obtains:" + count
                 + " registers and takes:"
                 + getMinutesFormMilis(initTime, endTime) + " minutes");

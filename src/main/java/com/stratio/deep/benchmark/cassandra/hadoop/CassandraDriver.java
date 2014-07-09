@@ -43,10 +43,10 @@ public class CassandraDriver extends Configured implements Tool {
         System.exit(0);
     }
 
-    private final String CASSANDRA_PORT = "9160";
-    private final String CASSANDRAHOST = "localhost";
-    private final String KEYSPACE = "wikipedia";
-    private final String PARTTIONER = "Murmur3Partitioner";
+    private String CASSANDRA_PORT;
+    private String CASSANDRAHOST;
+    private String KEYSPACE;
+    private String PARTTIONER;
 
     @Override
     public int run(String[] args) throws Exception {
