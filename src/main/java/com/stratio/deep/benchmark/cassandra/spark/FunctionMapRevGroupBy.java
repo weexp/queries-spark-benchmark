@@ -1,4 +1,4 @@
-package com.stratio.deep;
+package com.stratio.deep.benchmark.cassandra.spark;
 
 import java.io.Serializable;
 
