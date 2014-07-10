@@ -1,4 +1,4 @@
-package com.stratio.deep.benchmark.cassandra.spark;
+package com.stratio.deep.benchmark.cassandra.spark.filter;
 
 import java.util.Calendar;
 import java.util.Date;

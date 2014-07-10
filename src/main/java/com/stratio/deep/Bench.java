@@ -22,8 +22,13 @@ public class Bench {
 
     // JNRPEClient jnrpeClient = new JNRPEClient("172.19.0.207", 5666, false);
 
+<<<<<<< HEAD
+    //MINIMUM
+    public double min(double data[],int runs) {
+=======
     // MINIMUM
     public double min(double data[], int runs) {
+>>>>>>> fad3714ac101c76f442b4f3a1d4b2f96474c4b1f
         double minimo = data[0];
 
         // Nota: index start at one
