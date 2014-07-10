@@ -1,18 +1,23 @@
 package com.stratio.deep.benchmark.cassandra.hadoop;
 
-import java.io.IOException;
-
+import com.stratio.deep.benchmark.BenckmarkConstans;
+import com.stratio.deep.benchmark.cassandra.hadoop.filter.map.CassandraPageCountFilterMapper;
+import com.stratio.deep.benchmark.cassandra.hadoop.filter.reduce.CassandraPageCountFilterReduce;
+import com.stratio.deep.benchmark.cassandra.hadoop.group.reduce.HBaseGroup2Reduce;
+import com.stratio.deep.benchmark.cassandra.hadoop.join.map.CassandraPageCountForJoinMapper;
+import com.stratio.deep.benchmark.cassandra.hadoop.join.map.CassandraRevisionForJoinMapper;
+import com.stratio.deep.benchmark.cassandra.spark.FileFilter;
+import com.stratio.deep.benchmark.cassandra.spark.FileGroup;
+import com.stratio.deep.benchmark.cassandra.spark.FileJoin;
+import com.stratio.deep.benchmark.model.ContributorWritable;
+import com.stratio.deep.benchmark.model.RevisionPageCounter;
 import org.apache.cassandra.hadoop.ConfigHelper;
 import org.apache.cassandra.hadoop.cql3.CqlConfigHelper;
 import org.apache.cassandra.hadoop.cql3.CqlPagingInputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -24,14 +29,10 @@ import org.apache.hadoop.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.stratio.deep.benchmark.BenckmarkConstans;
-import com.stratio.deep.benchmark.cassandra.hadoop.filter.map.CassandraPageCountFilterMapper;
-import com.stratio.deep.benchmark.cassandra.hadoop.filter.reduce.CassandraPageCountFilterReduce;
-import com.stratio.deep.benchmark.cassandra.hadoop.group.reduce.HBaseGroup2Reduce;
-import com.stratio.deep.benchmark.cassandra.hadoop.join.map.CassandraPageCountForJoinMapper;
-import com.stratio.deep.benchmark.cassandra.hadoop.join.map.CassandraRevisionForJoinMapper;
-import com.stratio.deep.benchmark.model.ContributorWritable;
-import com.stratio.deep.benchmark.model.RevisionPageCounter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class CassandraDriver extends Configured implements Tool {
 
@@ -47,10 +48,37 @@ public class CassandraDriver extends Configured implements Tool {
     private String CASSANDRAHOST;
     private String KEYSPACE;
     private String PARTTIONER;
+    private List<String> slaves;
 
+    //String cassandraHost = "172.19.0.42";
     @Override
     public int run(String[] args) throws Exception {
         String nameNodePath = args[0];
+        CASSANDRAHOST = args[1];
+        slaves = Arrays.asList(args).subList(2, args.length);
+        List<FileFilter> filterList= new ArrayList<>();
+        // initialization files Master and Slaves for Filter
+        /*for (String node : slaves)
+        {
+            FileFilter fileFilterF_M = new FileFilter(node);
+            fileFilterF_M.start();
+            filterList.add(fileFilterF_M);
+        }
+        for (FileFilter filter : filterList)
+        {
+           filter.stop();
+        }
+        FileFilter fileFilterF_M = new FileFilter(args[1]);
+        fileFilterF_M.start();
+        */
+
+        FileJoin fileJoin_M = new FileJoin(args[0]);
+        fileJoin_M.start();
+        for (int i=0;  i ==  args.length; i++) {
+            FileJoin fileJoin_S1 = new FileJoin(slaves.get(i));
+            fileJoin_S1.start();
+        }
+
         this.setConf(new Configuration());
         long initTime = System.currentTimeMillis();
 
@@ -80,7 +108,21 @@ public class CassandraDriver extends Configured implements Tool {
         logger.info("Join used Cassandra takes:"
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
 
+        fileJoin_M.stop();
+        //fileJoin_S1.stop();
+        for (int i=0;  i ==  args.length; i++) {
+            FileJoin fileJoin_S1 = new FileJoin(slaves.get(i));
+            fileJoin_S1.stop();
+        }
+
         initTime = System.currentTimeMillis();
+
+        FileFilter fileFilterF_M = new FileFilter(args[0]);
+        fileFilterF_M.start();
+        for (int i=0;  i ==  args.length; i++) {
+            FileFilter fileFilter_S1 = new FileFilter(slaves.get(i));
+            fileFilter_S1.start();
+        }
 
         String filterJobOuputhPath = nameNodePath + "/"
                 + BenckmarkConstans.FILTER_JOB_BENCHMARK_NAME;
@@ -95,6 +137,20 @@ public class CassandraDriver extends Configured implements Tool {
         endTime = System.currentTimeMillis();
         logger.info("Filter used Cassandra takes:"
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
+
+        fileFilterF_M.stop();
+
+        for (int i=0;  i ==  args.length; i++) {
+            FileFilter fileFilter_S1 = new FileFilter(slaves.get(i));
+            fileFilter_S1.stop();
+        }
+
+        FileGroup fileGroup_M = new FileGroup(args[0]);
+        fileGroup_M.start();
+        for (int i=0;  i ==  args.length; i++) {
+            FileGroup fileGroup_S1 = new FileGroup(slaves.get(i));
+            fileGroup_S1.start();
+        }
 
         initTime = System.currentTimeMillis();
         String groupJobOuputhPath = nameNodePath + "/"
@@ -115,6 +171,12 @@ public class CassandraDriver extends Configured implements Tool {
         endTime = System.currentTimeMillis();
         logger.info("GroupBy used Cassandra takes:"
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
+
+        fileGroup_M.stop();
+        for (int i=0;  i ==  args.length; i++) {
+            FileGroup fileGroup_S1 = new FileGroup(slaves.get(i));
+            fileGroup_S1.stop();
+        }
 
         return 0;
     }

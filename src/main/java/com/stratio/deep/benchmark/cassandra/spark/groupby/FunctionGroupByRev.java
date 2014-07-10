@@ -1,11 +1,10 @@
-package com.stratio.deep.benchmark.cassandra.spark;
-
-import java.io.Serializable;
-
-import org.apache.spark.api.java.function.Function;
+package com.stratio.deep.benchmark.cassandra.spark.groupby;
 
 import com.stratio.deep.entity.Cell;
 import com.stratio.deep.entity.Cells;
+import org.apache.spark.api.java.function.Function;
+
+import java.io.Serializable;
 
 /**
  * Created by ParadigmaTecnologico on 24/06/2014.
