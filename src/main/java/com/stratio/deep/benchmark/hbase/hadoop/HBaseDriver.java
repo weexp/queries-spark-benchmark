@@ -48,6 +48,7 @@ public class HBaseDriver extends Configured implements Tool {
         System.exit(0);
     }
 
+    @Override
     public int run(String[] args) throws Exception {
         String nameNodePath = args[0];
 
@@ -80,8 +81,7 @@ public class HBaseDriver extends Configured implements Tool {
         String filterJobOuputhPath = nameNodePath + "/"
                 + BenckmarkConstans.FILTER_JOB_BENCHMARK_NAME;
 
-        launchHbaseJob(config,
-                BenckmarkConstans.FILTER_JOB_BENCHMARK_NAME,
+        launchHbaseJob(config, BenckmarkConstans.FILTER_JOB_BENCHMARK_NAME,
                 Arrays.asList(scanPageCount), HbasePageCountMapper.class,
                 filterJobOuputhPath, Text.class, PageCountWritable.class,
                 HBasePageCountReduce.class);
@@ -102,8 +102,7 @@ public class HBaseDriver extends Configured implements Tool {
                 HBaseGroup1Reduce.class);
         String group2JobOuputhPath = nameNodePath + "/"
                 + BenckmarkConstans.GROUP_JOB_2_BENCHMARK_NAME;
-        launchHadoopJob(config,
-                BenckmarkConstans.GROUP_JOB_2_BENCHMARK_NAME,
+        launchHadoopJob(config, BenckmarkConstans.GROUP_JOB_2_BENCHMARK_NAME,
                 Mapper.class, group2JobOuputhPath, ContributorWritable.class,
                 IntWritable.class, HBaseGroup2Reduce.class,
                 ContributorWritable.class, IntWritable.class,

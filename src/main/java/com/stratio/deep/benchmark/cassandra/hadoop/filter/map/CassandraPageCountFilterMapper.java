@@ -34,7 +34,7 @@ public class CassandraPageCountFilterMapper
             InterruptedException {
 
         Date ts = BenckmarkConstans.DATE_NULL;
-        ByteBuffer tsBB = value.get(BenckmarkConstans.PAGE_COUNT_TS);
+        ByteBuffer tsBB = value.get(BenckmarkConstans.PAGE_COUNTER_TS);
         if (null != tsBB) {
             ts = DateType.instance.compose(tsBB);
             Calendar cal = Calendar.getInstance();

@@ -33,8 +33,7 @@ public class HbasePageCountMapper extends
         Long ts = BenckmarkConstans.LONG_NULL;
         if (null != value.getValue(BenckmarkConstans.COLUMN_FAMILY,
                 BenckmarkConstans.PAGE_COUNT_TS)) {
-            ts = Bytes.toLong(value.getValue(
-                    BenckmarkConstans.COLUMN_FAMILY,
+            ts = Bytes.toLong(value.getValue(BenckmarkConstans.COLUMN_FAMILY,
                     BenckmarkConstans.PAGE_COUNT_TS));
         }
         Calendar cal = Calendar.getInstance();

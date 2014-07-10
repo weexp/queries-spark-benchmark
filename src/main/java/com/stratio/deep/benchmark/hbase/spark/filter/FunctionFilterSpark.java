@@ -19,11 +19,12 @@ public class FunctionFilterSpark implements
      */
     private static final long serialVersionUID = 1137120295128520072L;
 
+    @Override
     public Boolean call(Tuple2<ImmutableBytesWritable, Result> v1)
             throws Exception {
         Result result = v1._2();
         byte[] ts = result.getValue(BenckmarkConstans.COLUMN_FAMILY,
-                BenckmarkConstans.PAGE_COUNT_TS);
+                BenckmarkConstans.PAGE_COUNTER_TS);
         if (null != ts) {
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(Bytes.toLong(ts));
