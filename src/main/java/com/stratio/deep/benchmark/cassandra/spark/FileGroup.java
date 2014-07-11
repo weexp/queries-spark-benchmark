@@ -13,9 +13,10 @@ import java.util.List;
  */
 public class FileGroup extends Thread{
 
-    private String ip;
-    public FileGroup (String ip){
+    private String ip, path;
+    public FileGroup (String ip, String path){
         this.ip = ip;
+        this.path = path;
     }
 
     public void run() {
@@ -24,7 +25,7 @@ public class FileGroup extends Thread{
         //JNRPEClient jnrpeClient = new JNRPEClient("172.19.0.207", 5666, false);
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss:SSS");
-        String path = "/home/su/bench_copy/bench/Logs/GroupBy/";
+        //String path = "/home/su/bench_copy/bench/Logs/GroupBy/";
 
         //int dia = Integer.parseInt(Integer.toString(calendar.get(Calendar.DATE)));
         //int mes = Integer.parseInt(Integer.toString(calendar.get(Calendar.MONTH)));

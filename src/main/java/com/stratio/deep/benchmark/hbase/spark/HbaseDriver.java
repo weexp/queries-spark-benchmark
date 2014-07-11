@@ -1,19 +1,18 @@
 package com.stratio.deep.benchmark.hbase.spark;
 
-<<<<<<< HEAD
+
 import com.stratio.deep.benchmark.cassandra.spark.FileFilter;
 import com.stratio.deep.benchmark.cassandra.spark.FileGroup;
 import com.stratio.deep.benchmark.cassandra.spark.FileJoin;
 import com.stratio.deep.benchmark.hbase.hadoop.HBaseDriver;
+import com.stratio.deep.benchmark.hbase.serialize.ResultSerializable;
 import com.stratio.deep.benchmark.hbase.spark.filter.FunctionFilterSpark;
 import com.stratio.deep.benchmark.hbase.spark.group.GroupFunction;
+import com.stratio.deep.benchmark.hbase.spark.group.MapToGroupFunction;
 import com.stratio.deep.benchmark.hbase.spark.map.MapPageCountFunction;
 import com.stratio.deep.benchmark.hbase.spark.map.MapRevisionFunction;
+import com.stratio.deep.benchmark.hbase.spark.map.MapRevisionPairFunction;
 import com.stratio.deep.context.DeepSparkContext;
-=======
-import java.io.File;
-
->>>>>>> fad3714ac101c76f442b4f3a1d4b2f96474c4b1f
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
@@ -26,21 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
 
-<<<<<<< HEAD
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-=======
-import com.stratio.deep.benchmark.hbase.hadoop.HBaseDriver;
-import com.stratio.deep.benchmark.hbase.serialize.ResultSerializable;
-import com.stratio.deep.benchmark.hbase.spark.filter.FunctionFilterSpark;
-import com.stratio.deep.benchmark.hbase.spark.group.GroupFunction;
-import com.stratio.deep.benchmark.hbase.spark.group.MapToGroupFunction;
-import com.stratio.deep.benchmark.hbase.spark.map.MapPageCountFunction;
-import com.stratio.deep.benchmark.hbase.spark.map.MapRevisionFunction;
-import com.stratio.deep.benchmark.hbase.spark.map.MapRevisionPairFunction;
-import com.stratio.deep.context.DeepSparkContext;
->>>>>>> fad3714ac101c76f442b4f3a1d4b2f96474c4b1f
+
 
 public class HbaseDriver {
 
@@ -65,13 +54,15 @@ public class HbaseDriver {
         confPageCount.set(TableInputFormat.INPUT_TABLE, pageCountsHTable);
         SparkConf sparkConf = new SparkConf()
                 .set("spark.executor.memory", "8g");
-<<<<<<< HEAD
+        final String pathFileF= args[6];
+        final String pathFileG= args[7];
+        final String pathFileJ= args[8];
 
-        final List<String> slaves = Arrays.asList(args).subList(6, args.length);
+
+        final List<String> slaves = Arrays.asList(args).subList(9, args.length);
         List<FileFilter> filterList= new ArrayList<>();
 
-=======
->>>>>>> fad3714ac101c76f442b4f3a1d4b2f96474c4b1f
+
         context = new DeepSparkContext(new SparkContext(sparkMaster,
                 "Benchmark", sparkConf));
         String path = new File(HbaseDriver.class.getProtectionDomain()
@@ -87,11 +78,11 @@ public class HbaseDriver {
                 .newAPIHadoopRDD(confPageCount, TableInputFormat.class,
                         ImmutableBytesWritable.class, Result.class);
 
-        FileFilter fileFilterF_M = new FileFilter(args[0]);
-        fileFilterF_M.start();
-        for (int i=0;  i ==  args.length; i++) {
-            FileFilter fileFilter_S1 = new FileFilter(slaves.get(i));
-            fileFilter_S1.start();
+        FileJoin fileJoin_M = new FileJoin(args[0], args[8]);
+        fileJoin_M.start();
+        for (int i=9;  i ==  args.length; i++) {
+            FileJoin fileJoin_S = new FileJoin(slaves.get(i),args[8]);
+            fileJoin_S.start();
         }
 
         long initTime = System.currentTimeMillis();
@@ -104,6 +95,19 @@ public class HbaseDriver {
                 + " registers and takes:"
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
 
+        fileJoin_M.stop();
+        for (int i=9;  i ==  args.length; i++) {
+            FileJoin fileJoin_S = new FileJoin(slaves.get(i),args[8]);
+            fileJoin_S.stop();
+        }
+
+        FileFilter fileFilter_M = new FileFilter(args[0],args[6]);
+        fileFilter_M.start();
+        for (int i=9;  i ==  args.length; i++) {
+            FileFilter fileFilter_S = new FileFilter(slaves.get(i),args[6]);
+            fileFilter_S.start();
+        }
+
         initTime = System.currentTimeMillis();
 
         JavaPairRDD<ImmutableBytesWritable, Result> pageRddFilter = pageCountsRDD
@@ -115,17 +119,17 @@ public class HbaseDriver {
                 + " registers and takes:"
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
 
-        fileFilterF_M.stop();
-        for (int i=0;  i ==  args.length; i++) {
-            FileFilter fileFilter_S1 = new FileFilter(slaves.get(i));
-            fileFilter_S1.stop();
+        fileFilter_M.stop();
+        for (int i=9;  i ==  args.length; i++) {
+            FileFilter fileFilter_S = new FileFilter(slaves.get(i),args[6]);
+            fileFilter_S.stop();
         }
 
-        FileGroup fileGroup_M = new FileGroup(args[0]);
+        FileGroup fileGroup_M = new FileGroup(args[0],args[7]);
         fileGroup_M.start();
-        for (int i=0;  i ==  args.length; i++) {
-            FileGroup fileGroup_S1 = new FileGroup(slaves.get(i));
-            fileGroup_S1.start();
+        for (int i=9;  i ==  args.length; i++) {
+            FileGroup fileGroup_S = new FileGroup(slaves.get(i),args[7]);
+            fileGroup_S.start();
         }
 
         initTime = System.currentTimeMillis();
@@ -138,41 +142,15 @@ public class HbaseDriver {
         long count3 = counts.count();
         endTime = System.currentTimeMillis();
         logger.info("GroupBy used Hbase takes:"
-<<<<<<< HEAD
+
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
 
         fileGroup_M.stop();
-        for (int i=0;  i ==  args.length; i++) {
-            FileGroup fileGroup_S1 = new FileGroup(slaves.get(i));
-            fileGroup_S1.stop();
+        for (int i=9;  i ==  args.length; i++) {
+            FileGroup fileGroup_S = new FileGroup(slaves.get(i),args[7]);
+            fileGroup_S.stop();
         }
 
-        FileJoin fileJoin_M = new FileJoin(args[0]);
-        fileJoin_M.start();
-        for (int i=0;  i ==  args.length; i++) {
-            FileJoin fileJoin_S1 = new FileJoin(slaves.get(i));
-            fileJoin_S1.start();
-        }
-
-        initTime = System.currentTimeMillis();
-        JavaPairRDD<String, Tuple2<Result, Result>> joinTestRDD = pageCountsRDD
-                .mapToPair(new MapPageCountFunction()).join(
-                        revisionRDD.mapToPair(new MapRevisionFunction()));
-        long count2 = joinTestRDD.count();
-        endTime = System.currentTimeMillis();
-        logger.info("Join used Hbase with Spark obtains:" + count2
-                + " registers and takes:"
-                + getMinutesFormMilis(initTime, endTime) + " minutes");
-=======
-                + getMinutesFormMilis(initTime, endTime)
-                + " minutes and obtains " + count3 + " registers");
->>>>>>> fad3714ac101c76f442b4f3a1d4b2f96474c4b1f
-
-        fileJoin_M.stop();
-        for (int i=0;  i ==  args.length; i++) {
-            FileJoin fileJoin_S1 = new FileJoin(slaves.get(i));
-            fileJoin_S1.stop();
-        }
 
     }
 

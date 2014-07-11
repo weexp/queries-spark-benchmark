@@ -55,28 +55,19 @@ public class CassandraDriver extends Configured implements Tool {
     public int run(String[] args) throws Exception {
         String nameNodePath = args[0];
         CASSANDRAHOST = args[1];
-        slaves = Arrays.asList(args).subList(2, args.length);
-        List<FileFilter> filterList= new ArrayList<>();
-        // initialization files Master and Slaves for Filter
-        /*for (String node : slaves)
-        {
-            FileFilter fileFilterF_M = new FileFilter(node);
-            fileFilterF_M.start();
-            filterList.add(fileFilterF_M);
-        }
-        for (FileFilter filter : filterList)
-        {
-           filter.stop();
-        }
-        FileFilter fileFilterF_M = new FileFilter(args[1]);
-        fileFilterF_M.start();
-        */
+        final String pathFileF= args[2];
+        final String pathFileG= args[3];
+        final String pathFileJ= args[4];
 
-        FileJoin fileJoin_M = new FileJoin(args[0]);
+        slaves = Arrays.asList(args).subList(5, args.length);
+        List<FileFilter> filterList= new ArrayList<>();
+
+
+        FileJoin fileJoin_M = new FileJoin(args[0],args[4]);
         fileJoin_M.start();
-        for (int i=0;  i ==  args.length; i++) {
-            FileJoin fileJoin_S1 = new FileJoin(slaves.get(i));
-            fileJoin_S1.start();
+        for (int i=5;  i ==  args.length; i++) {
+            FileJoin fileJoin_S = new FileJoin(slaves.get(i),args[4]);
+            fileJoin_S.start();
         }
 
         this.setConf(new Configuration());
@@ -110,18 +101,18 @@ public class CassandraDriver extends Configured implements Tool {
 
         fileJoin_M.stop();
         //fileJoin_S1.stop();
-        for (int i=0;  i ==  args.length; i++) {
-            FileJoin fileJoin_S1 = new FileJoin(slaves.get(i));
-            fileJoin_S1.stop();
+        for (int i=5;  i ==  args.length; i++) {
+            FileJoin fileJoin_S = new FileJoin(slaves.get(i),args[4]);
+            fileJoin_S.stop();
         }
 
         initTime = System.currentTimeMillis();
 
-        FileFilter fileFilterF_M = new FileFilter(args[0]);
-        fileFilterF_M.start();
-        for (int i=0;  i ==  args.length; i++) {
-            FileFilter fileFilter_S1 = new FileFilter(slaves.get(i));
-            fileFilter_S1.start();
+        FileFilter fileFilter_M = new FileFilter(args[0],args[2]);
+        fileFilter_M.start();
+        for (int i=5;  i ==  args.length; i++) {
+            FileFilter fileFilter_S = new FileFilter(slaves.get(i),args[2]);
+            fileFilter_S.start();
         }
 
         String filterJobOuputhPath = nameNodePath + "/"
@@ -138,18 +129,18 @@ public class CassandraDriver extends Configured implements Tool {
         logger.info("Filter used Cassandra takes:"
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
 
-        fileFilterF_M.stop();
+        fileFilter_M.stop();
 
-        for (int i=0;  i ==  args.length; i++) {
-            FileFilter fileFilter_S1 = new FileFilter(slaves.get(i));
+        for (int i=5;  i ==  args.length; i++) {
+            FileFilter fileFilter_S1 = new FileFilter(slaves.get(i),args[2]);
             fileFilter_S1.stop();
         }
 
-        FileGroup fileGroup_M = new FileGroup(args[0]);
+        FileGroup fileGroup_M = new FileGroup(args[0],args[3]);
         fileGroup_M.start();
-        for (int i=0;  i ==  args.length; i++) {
-            FileGroup fileGroup_S1 = new FileGroup(slaves.get(i));
-            fileGroup_S1.start();
+        for (int i=5;  i ==  args.length; i++) {
+            FileGroup fileGroup_S = new FileGroup(slaves.get(i),args[3]);
+            fileGroup_S.start();
         }
 
         initTime = System.currentTimeMillis();
@@ -173,9 +164,9 @@ public class CassandraDriver extends Configured implements Tool {
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
 
         fileGroup_M.stop();
-        for (int i=0;  i ==  args.length; i++) {
-            FileGroup fileGroup_S1 = new FileGroup(slaves.get(i));
-            fileGroup_S1.stop();
+        for (int i=5;  i ==  args.length; i++) {
+            FileGroup fileGroup_S = new FileGroup(slaves.get(i),args[3]);
+            fileGroup_S.stop();
         }
 
         return 0;
