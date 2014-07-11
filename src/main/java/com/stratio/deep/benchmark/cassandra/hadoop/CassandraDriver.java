@@ -1,12 +1,14 @@
 package com.stratio.deep.benchmark.cassandra.hadoop;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.cassandra.hadoop.ConfigHelper;
 import org.apache.cassandra.hadoop.cql3.CqlConfigHelper;
 import org.apache.cassandra.hadoop.cql3.CqlPagingInputFormat;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -16,24 +18,27 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.stratio.deep.benchmark.BenckmarkConstans;
+import com.stratio.deep.benchmark.HadoopLauncher;
 import com.stratio.deep.benchmark.cassandra.hadoop.filter.map.CassandraPageCountFilterMapper;
 import com.stratio.deep.benchmark.cassandra.hadoop.filter.reduce.CassandraPageCountFilterReduce;
-import com.stratio.deep.benchmark.cassandra.hadoop.group.reduce.HBaseGroup2Reduce;
+import com.stratio.deep.benchmark.cassandra.hadoop.group.map.GroupMapper;
+import com.stratio.deep.benchmark.cassandra.hadoop.group.reduce.CassadraGroupReduce;
 import com.stratio.deep.benchmark.cassandra.hadoop.join.map.CassandraPageCountForJoinMapper;
 import com.stratio.deep.benchmark.cassandra.hadoop.join.map.CassandraRevisionForJoinMapper;
+import com.stratio.deep.benchmark.cassandra.hadoop.join.reduce.JoinReducer;
+import com.stratio.deep.benchmark.cassandra.spark.FileFilter;
+import com.stratio.deep.benchmark.cassandra.spark.FileGroup;
+import com.stratio.deep.benchmark.cassandra.spark.FileJoin;
 import com.stratio.deep.benchmark.model.ContributorWritable;
 import com.stratio.deep.benchmark.model.RevisionPageCounter;
 
-public class CassandraDriver extends Configured implements Tool {
+public class CassandraDriver extends HadoopLauncher {
 
     private static final Logger logger = LoggerFactory
             .getLogger(CassandraDriver.class);
@@ -47,10 +52,31 @@ public class CassandraDriver extends Configured implements Tool {
     private String CASSANDRAHOST;
     private String KEYSPACE;
     private String PARTTIONER;
+    private List<String> slaves;
 
+    // String cassandraHost = "172.19.0.42";
     @Override
     public int run(String[] args) throws Exception {
         String nameNodePath = args[0];
+        this.CASSANDRAHOST = args[1];
+        this.slaves = Arrays.asList(args).subList(2, args.length);
+        List<FileFilter> filterList = new ArrayList<>();
+        // initialization files Master and Slaves for Filter
+        /*
+         * for (String node : slaves) { FileFilter fileFilterF_M = new
+         * FileFilter(node); fileFilterF_M.start();
+         * filterList.add(fileFilterF_M); } for (FileFilter filter : filterList)
+         * { filter.stop(); } FileFilter fileFilterF_M = new
+         * FileFilter(args[1]); fileFilterF_M.start();
+         */
+
+        FileJoin fileJoin_M = new FileJoin(args[0]);
+        fileJoin_M.start();
+        for (int i = 0; i == args.length; i++) {
+            FileJoin fileJoin_S1 = new FileJoin(this.slaves.get(i));
+            fileJoin_S1.start();
+        }
+
         this.setConf(new Configuration());
         long initTime = System.currentTimeMillis();
 
@@ -74,13 +100,32 @@ public class CassandraDriver extends Configured implements Tool {
                 BenckmarkConstans.NUM_PAG, Reducer.class, Text.class,
                 RevisionPageCounter.class, Text.class,
                 RevisionPageCounter.class);
+        this.launchHadoopJob(BenckmarkConstans.JOIN_JOB_BENCHMARK_NAME,
+                Mapper.class, BenckmarkConstans.JOIN_JOB_BENCHMARK_NAME
+                        + "/JOIN/", Text.class, RevisionPageCounter.class,
+                JoinReducer.class, ContributorWritable.class,
+                NullWritable.class, joinRevJobOuputhPath, joinPGJobOuputhPath);
 
         long endTime = System.currentTimeMillis();
 
         logger.info("Join used Cassandra takes:"
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
 
+        fileJoin_M.stop();
+        // fileJoin_S1.stop();
+        for (int i = 0; i == args.length; i++) {
+            FileJoin fileJoin_S1 = new FileJoin(this.slaves.get(i));
+            fileJoin_S1.stop();
+        }
+
         initTime = System.currentTimeMillis();
+
+        FileFilter fileFilterF_M = new FileFilter(args[0]);
+        fileFilterF_M.start();
+        for (int i = 0; i == args.length; i++) {
+            FileFilter fileFilter_S1 = new FileFilter(this.slaves.get(i));
+            fileFilter_S1.start();
+        }
 
         String filterJobOuputhPath = nameNodePath + "/"
                 + BenckmarkConstans.FILTER_JOB_BENCHMARK_NAME;
@@ -96,31 +141,40 @@ public class CassandraDriver extends Configured implements Tool {
         logger.info("Filter used Cassandra takes:"
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
 
+        fileFilterF_M.stop();
+
+        for (int i = 0; i == args.length; i++) {
+            FileFilter fileFilter_S1 = new FileFilter(this.slaves.get(i));
+            fileFilter_S1.stop();
+        }
+
+        FileGroup fileGroup_M = new FileGroup(args[0]);
+        fileGroup_M.start();
+        for (int i = 0; i == args.length; i++) {
+            FileGroup fileGroup_S1 = new FileGroup(this.slaves.get(i));
+            fileGroup_S1.start();
+        }
+
         initTime = System.currentTimeMillis();
         String groupJobOuputhPath = nameNodePath + "/"
                 + BenckmarkConstans.GROUP_JOB_1_BENCHMARK_NAME;
-        /**
-         * 
-         * TODO: Do again the join between PageCount and Revision
-         * 
-         */
-        String group2JobOuputhPath = nameNodePath + "/"
-                + BenckmarkConstans.GROUP_JOB_2_BENCHMARK_NAME;
 
-        this.launchHadoopJob(BenckmarkConstans.GROUP_JOB_2_BENCHMARK_NAME,
-                Mapper.class, group2JobOuputhPath, ContributorWritable.class,
-                IntWritable.class, HBaseGroup2Reduce.class,
-                ContributorWritable.class, IntWritable.class,
-                groupJobOuputhPath);
+        this.launchHadoopJob(BenckmarkConstans.GROUP_JOB_1_BENCHMARK_NAME,
+                GroupMapper.class, groupJobOuputhPath,
+                ContributorWritable.class, NullWritable.class,
+                CassadraGroupReduce.class, ContributorWritable.class,
+                IntWritable.class, groupJobOuputhPath);
         endTime = System.currentTimeMillis();
         logger.info("GroupBy used Cassandra takes:"
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
 
-        return 0;
-    }
+        fileGroup_M.stop();
+        for (int i = 0; i == args.length; i++) {
+            FileGroup fileGroup_S1 = new FileGroup(this.slaves.get(i));
+            fileGroup_S1.stop();
+        }
 
-    private static Float getMinutesFormMilis(long initTime, long endTime) {
-        return (Float.valueOf(endTime) - Float.valueOf(initTime)) / 1000f / 60f;
+        return 0;
     }
 
     private <T extends Mapper, U extends Reducer, W extends WritableComparable, Z extends Writable, X extends WritableComparable, Y extends Writable> void launchCassandraJob(
@@ -153,26 +207,6 @@ public class CassandraDriver extends Configured implements Tool {
                 this.PARTTIONER);
         CqlConfigHelper.setInputCQLPageRowSize(job.getConfiguration(), numPag);
         job.setNumReduceTasks(6);
-        job.waitForCompletion(true);
-
-    }
-
-    private <M extends Mapper, KM extends WritableComparable, VM extends Writable, R extends Reducer, KR extends WritableComparable, VR extends Writable> void launchHadoopJob(
-            String jobName, Class<M> mapperClass, String jobOuputhPath,
-            Class<KM> keyToSend, Class<VM> valueToSend, Class<R> reducerClass,
-            Class<KR> keyReduce, Class<VR> valueReduce, String inputPath)
-            throws IOException, ClassNotFoundException, InterruptedException {
-        Job job = Job.getInstance(this.getConf(), jobName);
-        job.setJarByClass(CassandraDriver.class);
-        job.setOutputFormatClass(FileOutputFormat.class);
-        job.setInputFormatClass(SequenceFileInputFormat.class);
-        SequenceFileInputFormat.setInputPaths(job, new Path(inputPath));
-        job.setReducerClass(reducerClass);
-        job.setMapOutputKeyClass(keyToSend);
-        job.setMapOutputValueClass(valueToSend);
-        job.setOutputKeyClass(keyReduce);
-        job.setOutputValueClass(valueReduce);
-        FileOutputFormat.setOutputPath(job, new Path(jobOuputhPath));
         job.waitForCompletion(true);
 
     }

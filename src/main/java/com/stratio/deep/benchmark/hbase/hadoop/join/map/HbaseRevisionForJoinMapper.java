@@ -1,4 +1,4 @@
-package com.stratio.deep.benchmark.hbase.hadoop.join.revision.map;
+package com.stratio.deep.benchmark.hbase.hadoop.join.map;
 
 import java.io.IOException;
 import java.util.Date;

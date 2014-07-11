@@ -1,13 +1,10 @@
-package com.stratio.deep.benchmark.cassandra.spark;
+package com.stratio.deep.benchmark.cassandra.spark.groupby;
 
-import java.io.Serializable;
-
+import com.stratio.deep.entity.Cells;
 import org.apache.spark.api.java.function.PairFunction;
-
 import scala.Tuple2;
 
-import com.stratio.deep.entity.Cell;
-import com.stratio.deep.entity.Cells;
+import java.io.Serializable;
 
 /**
  * Created by ParadigmaTecnologico on 23/06/2014.
@@ -22,8 +19,7 @@ public class FunctionMapRevGroupBy implements
         String contributor = t._1();
         int i = 0;
         for (Cells cells : t._2()) {
-            Cell cellByName = cells.getCellByName("");
-            i += (Integer) cellByName.getCellValue();
+            i += 1;
         }
         return new Tuple2<String, Integer>(contributor, i);
     }

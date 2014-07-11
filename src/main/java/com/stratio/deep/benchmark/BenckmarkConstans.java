@@ -69,19 +69,17 @@ public class BenckmarkConstans {
     public static final String FILTER_JOB_BENCHMARK_NAME = "filterJobBenchMark";
     public static final HTableMetadata PAGE_COUNT_METADATA = new HTableMetadata(
             "pagecounts", new HColumnFamilyMetadata(COLUMN_FAMILY_NAME,
-                    new HQualifiersMetadata(ID_COLUMN_NAME, DataType.String),
                     new HQualifiersMetadata(PAGE_COUNTER_TITLE_COLUMN_NAME,
                             DataType.String),
                     new HQualifiersMetadata(PAGE_COUNTS_PAGECOUNTS_COLUMN_NAME,
                             DataType.String), new HQualifiersMetadata(
-                            PAGE_COUNTS_PAGECOUNTS_COLUMN_NAME, DataType.Date)));
+                            PAGE_COUNTS_TS_COLUMN_NAME, DataType.Date)));
     public static final String PAGE_ID_COLUMN_NAME = "page_id";
     public static final String PAGE_NS_COLUMN_NAME = "page_ns";
     public static final String PAGE_TITLE_COLUMN_NAME = "page_title";
 
     public static final HTableMetadata REVISION_METADATA = new HTableMetadata(
             "revision", new HColumnFamilyMetadata(COLUMN_FAMILY_NAME,
-                    new HQualifiersMetadata(ID_COLUMN_NAME, DataType.String),
                     new HQualifiersMetadata(REVISION_TEXT_COLUMN_NAME,
                             DataType.String), new HQualifiersMetadata(
                             REVISION_REDIRECTION_COLUMN_NAME, DataType.String),

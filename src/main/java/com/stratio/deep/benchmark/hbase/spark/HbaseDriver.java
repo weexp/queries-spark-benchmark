@@ -1,6 +1,9 @@
 package com.stratio.deep.benchmark.hbase.spark;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Result;
@@ -15,6 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import scala.Tuple2;
 
+import com.stratio.deep.benchmark.cassandra.spark.FileFilter;
+import com.stratio.deep.benchmark.cassandra.spark.FileGroup;
 import com.stratio.deep.benchmark.hbase.hadoop.HBaseDriver;
 import com.stratio.deep.benchmark.hbase.serialize.ResultSerializable;
 import com.stratio.deep.benchmark.hbase.spark.filter.FunctionFilterSpark;
@@ -48,6 +53,10 @@ public class HbaseDriver {
         confPageCount.set(TableInputFormat.INPUT_TABLE, pageCountsHTable);
         SparkConf sparkConf = new SparkConf()
                 .set("spark.executor.memory", "8g");
+
+        final List<String> slaves = Arrays.asList(args).subList(6, args.length);
+        List<FileFilter> filterList = new ArrayList<>();
+
         context = new DeepSparkContext(new SparkContext(sparkMaster,
                 "Benchmark", sparkConf));
         String path = new File(HbaseDriver.class.getProtectionDomain()
@@ -62,6 +71,14 @@ public class HbaseDriver {
         JavaPairRDD<ImmutableBytesWritable, Result> pageCountsRDD = context
                 .newAPIHadoopRDD(confPageCount, TableInputFormat.class,
                         ImmutableBytesWritable.class, Result.class);
+
+        FileFilter fileFilterF_M = new FileFilter(args[0]);
+        fileFilterF_M.start();
+        for (int i = 0; i == args.length; i++) {
+            FileFilter fileFilter_S1 = new FileFilter(slaves.get(i));
+            fileFilter_S1.start();
+        }
+
         long initTime = System.currentTimeMillis();
         JavaPairRDD<String, Tuple2<ResultSerializable, ResultSerializable>> joinTestRDD = pageCountsRDD
                 .mapToPair(new MapPageCountFunction()).join(
@@ -83,6 +100,19 @@ public class HbaseDriver {
                 + " registers and takes:"
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
 
+        fileFilterF_M.stop();
+        for (int i = 0; i == args.length; i++) {
+            FileFilter fileFilter_S1 = new FileFilter(slaves.get(i));
+            fileFilter_S1.stop();
+        }
+
+        FileGroup fileGroup_M = new FileGroup(args[0]);
+        fileGroup_M.start();
+        for (int i = 0; i == args.length; i++) {
+            FileGroup fileGroup_S1 = new FileGroup(slaves.get(i));
+            fileGroup_S1.start();
+        }
+
         initTime = System.currentTimeMillis();
         JavaRDD<ResultSerializable> mapToGroupRDD = revisionRDD
                 .map(new MapRevisionFunction());
@@ -93,8 +123,13 @@ public class HbaseDriver {
         long count3 = counts.count();
         endTime = System.currentTimeMillis();
         logger.info("GroupBy used Hbase takes:"
-                + getMinutesFormMilis(initTime, endTime)
-                + " minutes and obtains " + count3 + " registers");
+                + getMinutesFormMilis(initTime, endTime) + " minutes");
+
+        fileGroup_M.stop();
+        for (int i = 0; i == args.length; i++) {
+            FileGroup fileGroup_S1 = new FileGroup(slaves.get(i));
+            fileGroup_S1.stop();
+        }
 
     }
 

@@ -13,13 +13,22 @@ import java.util.List;
  */
 public class FileFilter extends Thread{
 
+
+    private String ip;
+    public FileFilter (String ip){
+        this.ip = ip;
+
+    }
+
+
+
     public void run() {
 
 
         //JNRPEClient jnrpeClient = new JNRPEClient("172.19.0.207", 5666, false);
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss:SSS");
-	String path = "/home/su/bench/Logs/Filter/";
+	    String path = "/home/su/bench/Logs/Filter/";
 
         //int dia = Integer.parseInt(Integer.toString(calendar.get(Calendar.DATE)));
         //int mes = Integer.parseInt(Integer.toString(calendar.get(Calendar.MONTH)));
@@ -27,12 +36,10 @@ public class FileFilter extends Thread{
         int t = 1;
         File FileCpu = new File(path +"cpu.txt");
         File FileDisk = new File(path +"disk.txt");
-        File FileCpuAvg = new File(path +"cpu_average.txt");
         File FileMemFree = new File(path +"mem_free.txt");
         File FileMemSwap = new File(path +"mem_swap.txt");
-        File FileDiskAll = new File(path +"disk_all.txt");
 
-        Bench bench = new Bench ();
+        Bench bench = new Bench (ip);
 
         while (t == 1) {
 
@@ -40,10 +47,9 @@ public class FileFilter extends Thread{
                 /****Bench Methods****/
                 List<MetricValue> disk = bench.disk();
                 List<MetricValue> cpu = bench.cpu();
-                List<MetricValue> cpu_avg = bench.cpu_avg();
                 List<MetricValue> mem_free = bench.mem_free();
                 List<MetricValue> mem_swap = bench.mem_swap();
-                List<MetricValue> disk_all = bench.disk_all();
+                List<MetricValue> cass_name = bench.cass_cluster_name();
                 /****Bench Methods****/
 
              /*METRICAS*/
@@ -62,32 +68,23 @@ public class FileFilter extends Thread{
 
                 try {
                     FileWriter TextOutCpu = new FileWriter(FileCpu, true);
-                    FileWriter TextOutCpuAvg = new FileWriter(FileCpuAvg, true);
                     FileWriter TextOutDisk = new FileWriter(FileDisk, true);
                     FileWriter TextOutMemFree = new FileWriter(FileMemFree, true);
                     FileWriter TextOutMemSwap = new FileWriter(FileMemSwap, true);
-                    FileWriter TextOutDiskAll = new FileWriter(FileDiskAll, true);
 
-
-                    TextOutDisk.write (sdf.format(Calendar.getInstance().getTime()));
+                    TextOutDisk.write (ip+ " "+sdf.format(Calendar.getInstance().getTime()));
                     TextOutDisk.write(disk +"\r\n");
-                    TextOutCpuAvg.write (sdf.format(Calendar.getInstance().getTime()));
-                    TextOutCpuAvg.write(cpu_avg +"\r\n");
-                    TextOutCpu.write (sdf.format(Calendar.getInstance().getTime()));
+                    TextOutCpu.write (ip+ " "+sdf.format(Calendar.getInstance().getTime()));
                     TextOutCpu.write(cpu +"\r\n");
-                    TextOutMemFree.write (sdf.format(Calendar.getInstance().getTime()));
+                    TextOutMemFree.write (ip+ " "+sdf.format(Calendar.getInstance().getTime()));
                     TextOutMemFree.write(mem_free +"\r\n");
-                    TextOutMemSwap.write (sdf.format(Calendar.getInstance().getTime()));
+                    TextOutMemSwap.write (ip+ " "+sdf.format(Calendar.getInstance().getTime()));
                     TextOutMemSwap.write(mem_swap +"\r\n");
-                    TextOutDiskAll.write (sdf.format(Calendar.getInstance().getTime()));
-                    TextOutDiskAll.write(disk_all +"\r\n");
 
                     TextOutCpu.close();
-                    TextOutCpuAvg.close();
                     TextOutDisk.close();
                     TextOutMemFree.close();
                     TextOutMemSwap.close();
-                    TextOutDiskAll.close();
 
 
                 } catch (Exception e){}

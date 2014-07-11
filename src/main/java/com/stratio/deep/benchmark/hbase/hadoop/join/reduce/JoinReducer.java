@@ -1,4 +1,4 @@
-package com.stratio.deep.benchmark.hbase.hadoop.join.revision.reduce;
+package com.stratio.deep.benchmark.hbase.hadoop.join.reduce;
 
 import java.io.IOException;
 

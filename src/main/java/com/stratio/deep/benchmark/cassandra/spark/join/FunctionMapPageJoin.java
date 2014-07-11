@@ -1,13 +1,11 @@
-package com.stratio.deep.benchmark.cassandra.spark;
-
-import java.io.Serializable;
-
-import org.apache.spark.api.java.function.PairFunction;
-
-import scala.Tuple2;
+package com.stratio.deep.benchmark.cassandra.spark.join;
 
 import com.stratio.deep.entity.Cell;
 import com.stratio.deep.entity.Cells;
+import org.apache.spark.api.java.function.PairFunction;
+import scala.Tuple2;
+
+import java.io.Serializable;
 
 /**
  * Created by ParadigmaTecnologico on 24/06/2014.

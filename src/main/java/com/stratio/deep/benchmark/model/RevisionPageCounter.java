@@ -6,11 +6,12 @@ import java.io.IOException;
 import java.util.Date;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 
 import com.stratio.deep.benchmark.BenckmarkConstans;
 
-public class RevisionPageCounter implements Writable {
+public class RevisionPageCounter implements
+        WritableComparable<RevisionPageCounter> {
 
     private String title;
     private Date ts;
@@ -117,6 +118,7 @@ public class RevisionPageCounter implements Writable {
         return this.pageWritable;
     }
 
+    @Override
     public void write(DataOutput out) throws IOException {
         Text.writeString(out, this.title);
         out.writeLong(this.ts.getTime());
@@ -128,6 +130,7 @@ public class RevisionPageCounter implements Writable {
         Text.writeString(out, this.redirection);
     }
 
+    @Override
     public void readFields(DataInput in) throws IOException {
         this.title = Text.readString(in);
         this.ts = new Date(in.readLong());
@@ -137,5 +140,10 @@ public class RevisionPageCounter implements Writable {
         this.pageWritable.readFields(in);
         this.text = Text.readString(in);
         this.redirection = Text.readString(in);
+    }
+
+    @Override
+    public int compareTo(RevisionPageCounter other) {
+        return this.title.compareTo(other.getTitle());
     }
 }

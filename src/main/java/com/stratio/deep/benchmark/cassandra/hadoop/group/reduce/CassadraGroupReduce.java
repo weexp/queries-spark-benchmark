@@ -1,15 +1,16 @@
-package com.stratio.deep.benchmark.hbase.hadoop.group.reduce;
+package com.stratio.deep.benchmark.cassandra.hadoop.group.reduce;
 
 import java.io.IOException;
 
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import com.stratio.deep.benchmark.model.ContributorWritable;
 
-public class HBaseGroup2Reduce
+public class CassadraGroupReduce
         extends
-        Reducer<ContributorWritable, IntWritable, ContributorWritable, IntWritable> {
+        Reducer<ContributorWritable, NullWritable, ContributorWritable, IntWritable> {
 
     @Override
     protected void setup(Context context) throws IOException,
@@ -19,11 +20,12 @@ public class HBaseGroup2Reduce
 
     @Override
     protected void reduce(ContributorWritable key,
-            Iterable<IntWritable> values, Context context) throws IOException,
+            Iterable<NullWritable> values, Context context) throws IOException,
             InterruptedException {
         int i = 0;
-        for (IntWritable value : values) {
-            i += value.get();
+        for (@SuppressWarnings("unused")
+        NullWritable value : values) {
+            i++;
         }
         context.write(key, new IntWritable(i));
     }
