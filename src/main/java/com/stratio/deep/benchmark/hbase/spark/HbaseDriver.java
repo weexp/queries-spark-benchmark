@@ -20,6 +20,7 @@ import scala.Tuple2;
 
 import com.stratio.deep.benchmark.cassandra.spark.FileFilter;
 import com.stratio.deep.benchmark.cassandra.spark.FileGroup;
+import com.stratio.deep.benchmark.cassandra.spark.FileJoin;
 import com.stratio.deep.benchmark.hbase.hadoop.HBaseDriver;
 import com.stratio.deep.benchmark.hbase.serialize.ResultSerializable;
 import com.stratio.deep.benchmark.hbase.spark.filter.FunctionFilterSpark;
@@ -57,6 +58,10 @@ public class HbaseDriver {
         final List<String> slaves = Arrays.asList(args).subList(6, args.length);
         List<FileFilter> filterList = new ArrayList<>();
 
+        final String pathFileF = args[6];
+        final String pathFileG = args[7];
+        final String pathFileJ = args[8];
+
         context = new DeepSparkContext(new SparkContext(sparkMaster,
                 "Benchmark", sparkConf));
         String path = new File(HbaseDriver.class.getProtectionDomain()
@@ -71,12 +76,11 @@ public class HbaseDriver {
         JavaPairRDD<ImmutableBytesWritable, Result> pageCountsRDD = context
                 .newAPIHadoopRDD(confPageCount, TableInputFormat.class,
                         ImmutableBytesWritable.class, Result.class);
-
-        FileFilter fileFilterF_M = new FileFilter(args[0]);
-        fileFilterF_M.start();
-        for (int i = 0; i == args.length; i++) {
-            FileFilter fileFilter_S1 = new FileFilter(slaves.get(i));
-            fileFilter_S1.start();
+        FileJoin fileJoin_M = new FileJoin(args[0], args[8]);
+        fileJoin_M.start();
+        for (int i = 9; i == args.length; i++) {
+            FileJoin fileJoin_S = new FileJoin(slaves.get(i), args[8]);
+            fileJoin_S.start();
         }
 
         long initTime = System.currentTimeMillis();
@@ -89,6 +93,19 @@ public class HbaseDriver {
                 + " registers and takes:"
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
 
+        fileJoin_M.stop();
+        for (int i = 9; i == args.length; i++) {
+            FileJoin fileJoin_S = new FileJoin(slaves.get(i), args[8]);
+            fileJoin_S.stop();
+        }
+
+        FileFilter fileFilter_M = new FileFilter(args[0], args[6]);
+        fileFilter_M.start();
+        for (int i = 9; i == args.length; i++) {
+            FileFilter fileFilter_S = new FileFilter(slaves.get(i), args[6]);
+            fileFilter_S.start();
+        }
+
         initTime = System.currentTimeMillis();
 
         JavaPairRDD<ImmutableBytesWritable, Result> pageRddFilter = pageCountsRDD
@@ -100,17 +117,17 @@ public class HbaseDriver {
                 + " registers and takes:"
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
 
-        fileFilterF_M.stop();
-        for (int i = 0; i == args.length; i++) {
-            FileFilter fileFilter_S1 = new FileFilter(slaves.get(i));
-            fileFilter_S1.stop();
+        fileFilter_M.stop();
+        for (int i = 9; i == args.length; i++) {
+            FileFilter fileFilter_S = new FileFilter(slaves.get(i), args[6]);
+            fileFilter_S.stop();
         }
 
-        FileGroup fileGroup_M = new FileGroup(args[0]);
+        FileGroup fileGroup_M = new FileGroup(args[0], args[7]);
         fileGroup_M.start();
-        for (int i = 0; i == args.length; i++) {
-            FileGroup fileGroup_S1 = new FileGroup(slaves.get(i));
-            fileGroup_S1.start();
+        for (int i = 9; i == args.length; i++) {
+            FileGroup fileGroup_S = new FileGroup(slaves.get(i), args[7]);
+            fileGroup_S.start();
         }
 
         initTime = System.currentTimeMillis();
@@ -126,9 +143,9 @@ public class HbaseDriver {
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
 
         fileGroup_M.stop();
-        for (int i = 0; i == args.length; i++) {
-            FileGroup fileGroup_S1 = new FileGroup(slaves.get(i));
-            fileGroup_S1.stop();
+        for (int i = 9; i == args.length; i++) {
+            FileGroup fileGroup_S = new FileGroup(slaves.get(i), args[7]);
+            fileGroup_S.stop();
         }
 
     }

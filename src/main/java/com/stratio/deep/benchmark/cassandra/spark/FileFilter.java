@@ -14,10 +14,10 @@ import java.util.List;
 public class FileFilter extends Thread{
 
 
-    private String ip;
-    public FileFilter (String ip){
+    private String ip, path;
+    public FileFilter (String ip, String path){
         this.ip = ip;
-
+        this.path = path;
     }
 
 
@@ -28,7 +28,7 @@ public class FileFilter extends Thread{
         //JNRPEClient jnrpeClient = new JNRPEClient("172.19.0.207", 5666, false);
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss:SSS");
-	    String path = "/home/su/bench/Logs/Filter/";
+	    //String path = "/home/su/bench/Logs/Filter/";
 
         //int dia = Integer.parseInt(Integer.toString(calendar.get(Calendar.DATE)));
         //int mes = Integer.parseInt(Integer.toString(calendar.get(Calendar.MONTH)));
