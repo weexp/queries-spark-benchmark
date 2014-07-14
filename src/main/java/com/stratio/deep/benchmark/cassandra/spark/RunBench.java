@@ -91,7 +91,7 @@ public class RunBench {
         // Configuration and initialization for PageCounts
         ICassandraDeepJobConfig<Cells> configPage = DeepJobConfigFactory
                 .create().rpcPort(cassandraPort).keyspace(keyspace)
-                .table(table2).initialize();
+                .table(table2).bisectFactor(bisecFactor).initialize();
 
         // Creating the RDD for PageCounts
         CassandraJavaRDD<Cells> rddPage = deepContext
