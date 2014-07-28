@@ -1,15 +1,15 @@
-package com.stratio.deep.benchmark.model;
+package com.stratio.deep.benchmark.common.hadoop.model;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 
-import com.stratio.deep.benchmark.BenckmarkConstans;
+import com.stratio.deep.benchmark.common.BenchmarkConstans;
 
-public class PageCountWritable implements Writable {
+public class PageCountWritable implements WritableComparable<PageCountWritable> {
 
     private Long ts;
     private String title;
@@ -22,9 +22,9 @@ public class PageCountWritable implements Writable {
     }
 
     public PageCountWritable() {
-        this.ts = BenckmarkConstans.LONG_NULL;
-        this.title = BenckmarkConstans.STRING_NULL;
-        this.pageCount = BenckmarkConstans.INT_NULL;
+        this.ts = BenchmarkConstans.LONG_NULL;
+        this.title = BenchmarkConstans.STRING_NULL;
+        this.pageCount = BenchmarkConstans.INT_NULL;
     }
 
     public Long getTs() {
@@ -66,15 +66,22 @@ public class PageCountWritable implements Writable {
         return writable;
     }
 
+    @Override
     public void write(DataOutput out) throws IOException {
         out.writeLong(this.ts);
         Text.writeString(out, this.title);
         out.writeInt(this.pageCount);
     }
 
+    @Override
     public void readFields(DataInput in) throws IOException {
         this.ts = in.readLong();
         this.title = Text.readString(in);
         this.pageCount = in.readInt();
+    }
+
+    @Override
+    public int compareTo(PageCountWritable other) {
+        return this.title.compareTo(other.getTitle());
     }
 }

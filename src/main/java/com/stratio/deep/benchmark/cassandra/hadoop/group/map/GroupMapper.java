@@ -10,8 +10,8 @@ import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 
-import com.stratio.deep.benchmark.BenckmarkConstans;
-import com.stratio.deep.benchmark.model.ContributorWritable;
+import com.stratio.deep.benchmark.common.BenchmarkConstans;
+import com.stratio.deep.benchmark.common.hadoop.model.ContributorWritable;
 
 public class GroupMapper
         extends
@@ -23,19 +23,19 @@ public class GroupMapper
             InterruptedException {
         Integer contributorId = -1;
         ByteBuffer contributorIdBB = value
-                .get(BenckmarkConstans.CONTRIBUTOR_ID);
+                .get(BenchmarkConstans.CONTRIBUTOR_ID);
         if (null != contributorIdBB) {
             contributorId = Int32Type.instance.compose(contributorIdBB);
         }
-        String username = BenckmarkConstans.STRING_NULL;
+        String username = BenchmarkConstans.STRING_NULL;
         ByteBuffer usernameBB = value
-                .get(BenckmarkConstans.CONTRIBUTOR_USER_NAME);
+                .get(BenchmarkConstans.CONTRIBUTOR_USER_NAME);
         if (null != usernameBB) {
             username = UTF8Type.instance.compose(usernameBB);
         }
         Boolean isAnonymous = false;
         ByteBuffer isAnonymousBB = value
-                .get(BenckmarkConstans.CONTRIBUTOR_IS_ANONYMOUS);
+                .get(BenchmarkConstans.CONTRIBUTOR_IS_ANONYMOUS);
         if (null != isAnonymousBB) {
             isAnonymous = BooleanType.instance.compose(isAnonymousBB);
         }

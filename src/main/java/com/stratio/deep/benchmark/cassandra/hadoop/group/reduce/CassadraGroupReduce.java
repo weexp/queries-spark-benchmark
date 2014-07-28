@@ -6,7 +6,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 
-import com.stratio.deep.benchmark.model.ContributorWritable;
+import com.stratio.deep.benchmark.common.hadoop.model.ContributorWritable;
 
 public class CassadraGroupReduce
         extends

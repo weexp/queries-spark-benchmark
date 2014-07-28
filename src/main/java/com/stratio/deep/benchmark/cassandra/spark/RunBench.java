@@ -20,9 +20,9 @@ import com.stratio.deep.benchmark.cassandra.spark.groupby.FunctionGroupByRev;
 import com.stratio.deep.benchmark.cassandra.spark.groupby.FunctionMapRevGroupBy;
 import com.stratio.deep.benchmark.cassandra.spark.join.FunctionMapPageJoin;
 import com.stratio.deep.benchmark.cassandra.spark.join.FunctionMapRevJoin;
-import com.stratio.deep.config.DeepJobConfigFactory;
+import com.stratio.deep.config.CassandraConfigFactory;
 import com.stratio.deep.config.ICassandraDeepJobConfig;
-import com.stratio.deep.context.DeepSparkContext;
+import com.stratio.deep.context.CassandraDeepSparkContext;
 import com.stratio.deep.entity.Cells;
 import com.stratio.deep.rdd.CassandraJavaRDD;
 
@@ -60,15 +60,12 @@ public class RunBench {
         String pathG = pathTime + "/groupTime.txt";
         String pathJ = pathTime + "/joinTime.txt";
         int cassandraPort = 9160;
-        // String keyspaceName = "minipedia";
-        // String tableNameRevision = "revision";
-        // String tableNamePage = "pagecounts";
 
         String pathJar = new File(RunBench.class.getProtectionDomain()
                 .getCodeSource().getLocation().getPath()).getAbsolutePath();
 
-        SparkConf sparkConf = new SparkConf()
-                .set("spark.executor.memory", "8g");
+        SparkConf sparkConf = new SparkConf().set("spark.executor.memory",
+                "16g");
         sparkConf.setMaster(cluster);
         sparkConf.setAppName(jobName);
         sparkConf.setJars(new String[] { pathJar });
@@ -76,10 +73,11 @@ public class RunBench {
         SparkContext sc = new SparkContext(sparkConf);
 
         // Creating Context
-        DeepSparkContext deepContext = new DeepSparkContext(sc);
+        CassandraDeepSparkContext deepContext = new CassandraDeepSparkContext(
+                sc);
 
         // Configuration and initialization for Revision
-        ICassandraDeepJobConfig<Cells> configRev = DeepJobConfigFactory
+        ICassandraDeepJobConfig<Cells> configRev = CassandraConfigFactory
                 .create().host(CASSANDRAHOST).rpcPort(cassandraPort)
                 .keyspace(keyspace).table(table1).bisectFactor(bisecFactor)
                 .initialize();
@@ -89,13 +87,15 @@ public class RunBench {
                 .cassandraJavaRDD(configRev);
 
         // Configuration and initialization for PageCounts
-        ICassandraDeepJobConfig<Cells> configPage = DeepJobConfigFactory
+        ICassandraDeepJobConfig<Cells> configPage = CassandraConfigFactory
                 .create().rpcPort(cassandraPort).keyspace(keyspace)
                 .table(table2).bisectFactor(bisecFactor).initialize();
 
         // Creating the RDD for PageCounts
         CassandraJavaRDD<Cells> rddPage = deepContext
                 .cassandraJavaRDD(configPage);
+
+        launchGroupByJob(rddRev, slaves, CASSANDRAHOST, pathFileG, pathG);
 
         // initialization files Master for Filter
         FileFilter fileFilter_M = new FileFilter(CASSANDRAHOST, pathFileF);
@@ -116,6 +116,8 @@ public class RunBench {
 
         System.out.println("\r\n Resultados Filter " + filtrado.count()
                 + "\r\n");
+
+        filtrado.unpersist();
 
         time_end = System.currentTimeMillis(); // End crono
         tT = (time_end - time_start) / 1000;
@@ -144,66 +146,6 @@ public class RunBench {
         for (int i = 9; i == args.length; i++) {
             FileFilter fileFilter_S = new FileFilter(slaves.get(i), pathFileF);
             fileFilter_S.stop();
-        }
-
-        // initialization files Master for Group
-        FileGroup fileGroup_M = new FileGroup(CASSANDRAHOST, pathFileG);
-        fileGroup_M.start();
-        // initialization files Slaves for Group
-        for (int i = 9; i == args.length; i++) {
-            FileGroup fileGroup_S = new FileGroup(slaves.get(i), pathFileG);
-            fileGroup_S.start();
-        }
-
-        // GROUPBY
-        // for (int i = 0; i < runs; i++) {
-        time_start = System.currentTimeMillis(); // Start Crono
-
-        // Function: GroupBy
-
-        JavaPairRDD<String, Iterable<Cells>> groups = rddRev
-                .groupBy(new FunctionGroupByRev());
-        JavaPairRDD<String, Integer> counts = groups
-                .mapToPair(new FunctionMapRevGroupBy());
-
-        // List<Tuple2<String, Integer>> results = counts.collect();
-        long results = counts.count();
-
-        // System.out.println("\r\n Resultados GroupBy " + results + "\r\n");
-        /*
-         * for (Tuple2 <String,Integer> tuple:results){
-         * System.out.println("\r\n Contributor "
-         * +tuple._1()+" numero de articulos a su nombre " +tuple._2()+ "\r\n");
-         * }
-         */
-
-        time_end = System.currentTimeMillis(); // End crono
-        tT = (time_end - time_start) / 1000;
-        // data[i] = tT;
-        // }
-
-        File FileTimes_G = new File(pathG);
-        FileWriter TextOutTime_G = new FileWriter(FileTimes_G, true);
-        TextOutTime_G.write("RESPONSE TIME GROUPBY: " + tT + " ");
-        TextOutTime_G.close();
-        // Calculate max
-        // Bench benchMaxG = new Bench();
-        // String.format("%.2f", benchMaxG.max(data, runs));
-
-        // Calculate min
-        // Bench benchMinG = new Bench();
-        // String.format("%.2f", benchMinG.min(data, runs));
-
-        // Calculate avg
-        // Bench benchAvgG = new Bench();
-        // String.format("%.2f", benchAvgG.media(data, runs));
-
-        // stop files Master for Group
-        fileGroup_M.stop();
-        // stop files Slaves for Group
-        for (int i = 9; i == args.length; i++) {
-            FileGroup fileGroup_S = new FileGroup(slaves.get(i), pathFileG);
-            fileGroup_S.stop();
         }
 
         // initialization files Master for Join
@@ -272,5 +214,70 @@ public class RunBench {
         deepContext.stop();
 
         System.exit(0);
+    }
+
+    private static void launchGroupByJob(CassandraJavaRDD rddRev,
+            List<String> slaves, String CASSANDRAHOST, String pathFileG,
+            String pathG) throws IOException {
+        // initialization files Master for Group
+        FileGroup fileGroup_M = new FileGroup(CASSANDRAHOST, pathFileG);
+        fileGroup_M.start();
+        // initialization files Slaves for Group
+        for (int i = 0; i < slaves.size(); i++) {
+            FileGroup fileGroup_S = new FileGroup(slaves.get(i), pathFileG);
+            fileGroup_S.start();
+        }
+
+        // GROUPBY
+        // for (int i = 0; i < runs; i++) {
+        long time_start = System.currentTimeMillis(); // Start Crono
+
+        // Function: GroupBy
+
+        JavaPairRDD<String, Iterable<Cells>> groups = rddRev
+                .groupBy(new FunctionGroupByRev());
+        JavaPairRDD<String, Integer> counts = groups
+                .mapToPair(new FunctionMapRevGroupBy());
+
+        // List<Tuple2<String, Integer>> results = counts.collect();
+        long results = counts.count();
+
+        // System.out.println("\r\n Resultados GroupBy " + results + "\r\n");
+        /*
+         * for (Tuple2 <String,Integer> tuple:results){
+         * System.out.println("\r\n Contributor "
+         * +tuple._1()+" numero de articulos a su nombre " +tuple._2()+ "\r\n");
+         * }
+         */
+
+        long time_end = System.currentTimeMillis(); // End crono
+        long tT = (time_end - time_start) / 1000;
+        // data[i] = tT;
+        // }
+
+        File FileTimes_G = new File(pathG);
+        FileWriter TextOutTime_G = new FileWriter(FileTimes_G, true);
+        TextOutTime_G.write("RESPONSE TIME GROUPBY: " + tT + " ");
+        TextOutTime_G.close();
+        // Calculate max
+        // Bench benchMaxG = new Bench();
+        // String.format("%.2f", benchMaxG.max(data, runs));
+
+        // Calculate min
+        // Bench benchMinG = new Bench();
+        // String.format("%.2f", benchMinG.min(data, runs));
+
+        // Calculate avg
+        // Bench benchAvgG = new Bench();
+        // String.format("%.2f", benchAvgG.media(data, runs));
+
+        // stop files Master for Group
+        fileGroup_M.stop();
+        // stop files Slaves for Group
+        for (int i = 0; i < slaves.size(); i++) {
+            FileGroup fileGroup_S = new FileGroup(slaves.get(i), pathFileG);
+            fileGroup_S.stop();
+        }
+
     }
 }

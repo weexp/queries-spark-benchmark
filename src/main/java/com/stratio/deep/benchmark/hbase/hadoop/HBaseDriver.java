@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Scan;
@@ -24,16 +25,18 @@ import org.apache.hadoop.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.stratio.deep.benchmark.BenckmarkConstans;
-import com.stratio.deep.benchmark.HadoopLauncher;
+import com.stratio.deep.benchmark.common.BenchmarkConstans;
+import com.stratio.deep.benchmark.common.HadoopLauncher;
+import com.stratio.deep.benchmark.common.hadoop.model.PageCountWritable;
+import com.stratio.deep.benchmark.common.hadoop.model.RevisionArrayWritable;
+import com.stratio.deep.benchmark.common.hadoop.model.RevisionPageCounter;
+import com.stratio.deep.benchmark.common.hadoop.model.RevisionWritable;
 import com.stratio.deep.benchmark.hbase.hadoop.filter.map.HbasePageCountMapper;
 import com.stratio.deep.benchmark.hbase.hadoop.filter.reduce.HBasePageCountReduce;
+import com.stratio.deep.benchmark.hbase.hadoop.group.map.HbaseGroupMap;
 import com.stratio.deep.benchmark.hbase.hadoop.group.reduce.HBaseGroupReduce;
 import com.stratio.deep.benchmark.hbase.hadoop.join.map.HbaseRevisionForJoinMapper;
 import com.stratio.deep.benchmark.hbase.hadoop.join.reduce.JoinReducer;
-import com.stratio.deep.benchmark.model.ContributorWritable;
-import com.stratio.deep.benchmark.model.PageCountWritable;
-import com.stratio.deep.benchmark.model.RevisionPageCounter;
 
 public class HBaseDriver extends HadoopLauncher {
 
@@ -53,20 +56,24 @@ public class HBaseDriver extends HadoopLauncher {
         Scan scanRevision = new Scan();
         scanRevision.setCaching(500);
         scanRevision.setAttribute(Scan.SCAN_ATTRIBUTES_TABLE_NAME,
-                Bytes.toBytes(BenckmarkConstans.TABLE_REVISION_NAME));
+                Bytes.toBytes(BenchmarkConstans.TABLE_REVISION_NAME));
         Scan scanPageCount = new Scan();
         scanPageCount.setCaching(500);
         scanPageCount.setAttribute(Scan.SCAN_ATTRIBUTES_TABLE_NAME,
-                Bytes.toBytes(BenckmarkConstans.TABLE_PAGE_COUNT_NAME));
+                Bytes.toBytes(BenchmarkConstans.TABLE_PAGE_COUNT_NAME));
 
         long initTime = System.currentTimeMillis();
 
         String joinJobOuputhPath = nameNodePath + "/"
-                + BenckmarkConstans.JOIN_JOB_BENCHMARK_NAME;
-
+                + BenchmarkConstans.JOIN_JOB_BENCHMARK_NAME;
+        FileSystem fs = FileSystem.get(this.getConf());
+        Path f = new Path(joinJobOuputhPath);
+        if (fs.exists(f)) {
+            fs.delete(f, true);
+        }
         launchHbaseJob(
                 config,
-                BenckmarkConstans.JOIN_JOB_BENCHMARK_NAME,
+                BenchmarkConstans.JOIN_JOB_BENCHMARK_NAME,
                 Arrays.asList(scanRevision, scanPageCount),
                 HbaseRevisionForJoinMapper.class,
                 joinJobOuputhPath,
@@ -76,6 +83,11 @@ public class HBaseDriver extends HadoopLauncher {
                 RevisionPageCounter.class,
                 IntWritable.class,
                 new SequenceFileOutputFormat<RevisionPageCounter, IntWritable>());
+
+        this.launchHadoopCounterJob(RevisionPageCounter.class,
+                IntWritable.class, BenchmarkConstans.JOIN_JOB_BENCHMARK_NAME
+                        + "Counter", joinJobOuputhPath + "/Counter",
+                joinJobOuputhPath, this.getClass());
         long endTime = System.currentTimeMillis();
 
         logger.info("Join used Hbase takes:"
@@ -84,14 +96,21 @@ public class HBaseDriver extends HadoopLauncher {
         initTime = System.currentTimeMillis();
 
         String filterJobOuputhPath = nameNodePath + "/"
-                + BenckmarkConstans.FILTER_JOB_BENCHMARK_NAME;
-
-        launchHbaseJob(config, BenckmarkConstans.FILTER_JOB_BENCHMARK_NAME,
+                + BenchmarkConstans.FILTER_JOB_BENCHMARK_NAME;
+        f = new Path(filterJobOuputhPath);
+        if (fs.exists(f)) {
+            fs.delete(f, true);
+        }
+        launchHbaseJob(config, BenchmarkConstans.FILTER_JOB_BENCHMARK_NAME,
                 Arrays.asList(scanPageCount), HbasePageCountMapper.class,
-                filterJobOuputhPath, Text.class, PageCountWritable.class,
-                HBasePageCountReduce.class, IntWritable.class,
-                NullWritable.class,
-                new SequenceFileOutputFormat<IntWritable, NullWritable>());
+                filterJobOuputhPath, PageCountWritable.class,
+                NullWritable.class, HBasePageCountReduce.class,
+                PageCountWritable.class, NullWritable.class,
+                new SequenceFileOutputFormat<PageCountWritable, NullWritable>());
+        this.launchHadoopCounterJob(RevisionPageCounter.class,
+                IntWritable.class, BenchmarkConstans.FILTER_JOB_BENCHMARK_NAME
+                        + "Counter", filterJobOuputhPath + "/Counter",
+                filterJobOuputhPath, this.getClass());
 
         endTime = System.currentTimeMillis();
         logger.info("Filter used Hbase takes:"
@@ -99,22 +118,23 @@ public class HBaseDriver extends HadoopLauncher {
 
         initTime = System.currentTimeMillis();
         String groupJobOuputhPath = nameNodePath + "/"
-                + BenckmarkConstans.GROUP_JOB_1_BENCHMARK_NAME;
-
-        launchHbaseJob(
-                config,
-                BenckmarkConstans.GROUP_JOB_1_BENCHMARK_NAME,
+                + BenchmarkConstans.GROUP_JOB_1_BENCHMARK_NAME;
+        f = new Path(groupJobOuputhPath);
+        if (fs.exists(f)) {
+            fs.delete(f, true);
+        }
+        launchHbaseJob(config, BenchmarkConstans.GROUP_JOB_1_BENCHMARK_NAME,
                 Arrays.asList(scanRevision, scanPageCount),
-                HbaseRevisionForJoinMapper.class,
-                groupJobOuputhPath,
-                ContributorWritable.class,
-                IntWritable.class,
-                HBaseGroupReduce.class,
-                ContributorWritable.class,
-                IntWritable.class,
-                new SequenceFileOutputFormat<ContributorWritable, IntWritable>());
-        String group2JobOuputhPath = nameNodePath + "/"
-                + BenckmarkConstans.GROUP_JOB_2_BENCHMARK_NAME;
+                HbaseGroupMap.class, groupJobOuputhPath, Text.class,
+                RevisionWritable.class, HBaseGroupReduce.class, Text.class,
+                RevisionArrayWritable.class,
+                new SequenceFileOutputFormat<Text, RevisionArrayWritable>());
+
+        this.launchHadoopCounterJob(Text.class, RevisionArrayWritable.class,
+                BenchmarkConstans.GROUP_JOB_1_BENCHMARK_NAME + "Counter",
+                groupJobOuputhPath + "/Counter", groupJobOuputhPath,
+                this.getClass());
+
         endTime = System.currentTimeMillis();
         logger.info("GroupBy used Hbase takes:"
                 + getMinutesFormMilis(initTime, endTime) + " minutes");
@@ -122,12 +142,13 @@ public class HBaseDriver extends HadoopLauncher {
         return 0;
     }
 
-    private static <U extends TableMapper, K extends WritableComparable, V extends Writable, R extends Reducer, KR extends WritableComparable, VR extends Writable, O extends FileOutputFormat> void launchHbaseJob(
+    private static <U extends TableMapper<K, V>, K extends WritableComparable, V extends Writable, R extends Reducer<K, V, KR, VR>, KR extends WritableComparable, VR extends Writable, O extends FileOutputFormat<KR, VR>> void launchHbaseJob(
             Configuration config, String jobName, List<Scan> scanList,
             Class<U> mapperClass, String jobOuputhPath, Class<K> keyToSend,
             Class<V> valueToSend, Class<R> reducerClass, Class<KR> reduceKey,
             Class<VR> reduceValue, O outputFormat) throws IOException,
             ClassNotFoundException, InterruptedException {
+        config.set("fs.defaultFS", "hdfs://master:8020/");
         Job job = Job.getInstance(config, jobName);
         job.setJarByClass(HBaseDriver.class);
         TableMapReduceUtil.initTableMapperJob(scanList, mapperClass, keyToSend,
@@ -137,6 +158,7 @@ public class HBaseDriver extends HadoopLauncher {
         job.setOutputKeyClass(reduceKey);
         job.setOutputValueClass(reduceValue);
         O.setOutputPath(job, new Path(jobOuputhPath));
+
         job.waitForCompletion(true);
     }
 

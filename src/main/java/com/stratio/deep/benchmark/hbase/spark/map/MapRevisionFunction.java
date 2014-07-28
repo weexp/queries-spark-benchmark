@@ -6,7 +6,7 @@ import org.apache.spark.api.java.function.Function;
 
 import scala.Tuple2;
 
-import com.stratio.deep.benchmark.BenckmarkConstans;
+import com.stratio.deep.benchmark.common.BenchmarkConstans;
 import com.stratio.deep.benchmark.hbase.serialize.ResultSerializable;
 
 public class MapRevisionFunction implements
@@ -21,6 +21,6 @@ public class MapRevisionFunction implements
     public ResultSerializable call(Tuple2<ImmutableBytesWritable, Result> t)
             throws Exception {
         return ResultSerializable.builder(t._2(),
-                BenckmarkConstans.REVISION_METADATA);
+                BenchmarkConstans.REVISION_METADATA);
     }
 }

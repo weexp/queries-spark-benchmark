@@ -6,7 +6,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-import com.stratio.deep.benchmark.model.RevisionPageCounter;
+import com.stratio.deep.benchmark.common.hadoop.model.RevisionPageCounter;
 
 public class JoinReducer extends
         Reducer<Text, RevisionPageCounter, RevisionPageCounter, NullWritable> {

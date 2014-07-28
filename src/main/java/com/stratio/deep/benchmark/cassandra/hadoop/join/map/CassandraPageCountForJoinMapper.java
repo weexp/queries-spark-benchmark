@@ -11,10 +11,10 @@ import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-import com.stratio.deep.benchmark.BenckmarkConstans;
-import com.stratio.deep.benchmark.model.ContributorWritable;
-import com.stratio.deep.benchmark.model.PageWritable;
-import com.stratio.deep.benchmark.model.RevisionPageCounter;
+import com.stratio.deep.benchmark.common.BenchmarkConstans;
+import com.stratio.deep.benchmark.common.hadoop.model.ContributorWritable;
+import com.stratio.deep.benchmark.common.hadoop.model.PageWritable;
+import com.stratio.deep.benchmark.common.hadoop.model.RevisionPageCounter;
 
 public class CassandraPageCountForJoinMapper
         extends
@@ -30,28 +30,28 @@ public class CassandraPageCountForJoinMapper
     protected void map(Map<String, ByteBuffer> key,
             Map<String, ByteBuffer> value, Context context) throws IOException,
             InterruptedException {
-        String title = BenckmarkConstans.STRING_NULL;
+        String title = BenchmarkConstans.STRING_NULL;
         ByteBuffer titleBB = value
-                .get(BenckmarkConstans.PAGE_COUNTER_TITLE);
+                .get(BenchmarkConstans.PAGE_COUNTER_TITLE);
         if (null != titleBB) {
             title = UTF8Type.instance.compose(titleBB);
         }
-        Long ts = BenckmarkConstans.LONG_NULL;
-        ByteBuffer tsBB = value.get(BenckmarkConstans.PAGE_COUNTER_TS);
+        Long ts = BenchmarkConstans.LONG_NULL;
+        ByteBuffer tsBB = value.get(BenchmarkConstans.PAGE_COUNTER_TS);
         if (null != tsBB) {
             ts = LongType.instance.compose(tsBB);
         }
-        Integer pagecounts = BenckmarkConstans.INT_NULL;
+        Integer pagecounts = BenchmarkConstans.INT_NULL;
         ByteBuffer pageCountsBB = value
-                .get(BenckmarkConstans.PAGE_COUNTER_COUNT);
+                .get(BenchmarkConstans.PAGE_COUNTER_COUNT);
         if (null != pageCountsBB) {
             pagecounts = Int32Type.instance.compose(pageCountsBB);
         }
         context.write(new Text(title), new RevisionPageCounter(title, new Date(
                 ts), pagecounts, new ContributorWritable(),
-                BenckmarkConstans.BOOLEAN_NULL, new PageWritable(),
-                BenckmarkConstans.STRING_NULL,
-                BenckmarkConstans.STRING_NULL));
+                BenchmarkConstans.BOOLEAN_NULL, new PageWritable(),
+                BenchmarkConstans.STRING_NULL,
+                BenchmarkConstans.STRING_NULL));
     }
 
     @Override

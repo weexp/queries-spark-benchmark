@@ -1,4 +1,4 @@
-package com.stratio.deep.benchmark.model;
+package com.stratio.deep.benchmark.common.hadoop.model;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -7,7 +7,7 @@ import java.io.IOException;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
-import com.stratio.deep.benchmark.BenckmarkConstans;
+import com.stratio.deep.benchmark.common.BenchmarkConstans;
 
 public class PageWritable implements Writable {
 
@@ -16,20 +16,20 @@ public class PageWritable implements Writable {
     private String fullTitle;
     private Integer id;
     private Boolean isRedirect;
-    private String restrictions;
+    private Text restrictions;
 
     public PageWritable() {
         super();
-        this.namespace = BenckmarkConstans.STRING_NULL;
-        this.title = BenckmarkConstans.STRING_NULL;
-        this.fullTitle = BenckmarkConstans.STRING_NULL;
-        this.id = BenckmarkConstans.INT_NULL;
-        this.isRedirect = BenckmarkConstans.BOOLEAN_NULL;
-        this.restrictions = BenckmarkConstans.STRING_NULL;
+        this.namespace = BenchmarkConstans.STRING_NULL;
+        this.title = BenchmarkConstans.STRING_NULL;
+        this.fullTitle = BenchmarkConstans.STRING_NULL;
+        this.id = BenchmarkConstans.INT_NULL;
+        this.isRedirect = BenchmarkConstans.BOOLEAN_NULL;
+        this.restrictions = BenchmarkConstans.TEXT_NULL;
     }
 
     public PageWritable(String namespace, String title, String fullTitle,
-            Integer id, Boolean isRedirect, String restrictions) {
+            Integer id, Boolean isRedirect, Text restrictions) {
         super();
         this.namespace = namespace;
         this.title = title;
@@ -79,30 +79,36 @@ public class PageWritable implements Writable {
         this.isRedirect = isRedirect;
     }
 
-    public String getRestrictions() {
+    public Text getRestrictions() {
         return this.restrictions;
     }
 
-    public void setRestrictions(String restrictions) {
+    public void setRestrictions(Text restrictions) {
         this.restrictions = restrictions;
     }
 
+    @Override
     public void write(DataOutput out) throws IOException {
         Text.writeString(out, this.namespace);
         Text.writeString(out, this.title);
         Text.writeString(out, this.fullTitle);
         out.write(this.id);
         out.writeBoolean(this.isRedirect);
-        Text.writeString(out, this.restrictions);
+        this.restrictions.write(out);
     }
 
+    @Override
     public void readFields(DataInput in) throws IOException {
         this.namespace = Text.readString(in);
         this.title = Text.readString(in);
         this.fullTitle = Text.readString(in);
         this.id = in.readInt();
         this.isRedirect = in.readBoolean();
-        this.restrictions = Text.readString(in);
+        try {
+            this.restrictions.readFields(in);
+        } catch (IndexOutOfBoundsException e) {
+            this.restrictions = new Text("");
+        }
     }
 
 }

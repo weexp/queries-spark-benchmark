@@ -6,7 +6,7 @@ import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
 
-import com.stratio.deep.benchmark.BenckmarkConstans;
+import com.stratio.deep.benchmark.common.BenchmarkConstans;
 import com.stratio.deep.benchmark.hbase.serialize.ResultSerializable;
 
 public class MapRevisionPairFunction
@@ -24,14 +24,14 @@ public class MapRevisionPairFunction
         ResultSerializable result = this.convertPageConterResulToSerializable(t
                 ._2());
         String title = (String) result.getValue(
-                BenckmarkConstans.COLUMN_FAMILY_NAME,
-                BenckmarkConstans.PAGE_TITLE_COLUMN_NAME);
+                BenchmarkConstans.COLUMN_FAMILY_NAME,
+                BenchmarkConstans.PAGE_TITLE_COLUMN_NAME);
         return new Tuple2<String, ResultSerializable>(title, result);
     }
 
     private ResultSerializable convertPageConterResulToSerializable(
             Result result) {
         return ResultSerializable.builder(result,
-                BenckmarkConstans.REVISION_METADATA);
+                BenchmarkConstans.REVISION_METADATA);
     }
 }

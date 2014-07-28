@@ -7,7 +7,7 @@ import java.util.Map;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
-import com.stratio.deep.benchmark.BenckmarkConstans;
+import com.stratio.deep.benchmark.common.BenchmarkConstans;
 
 public class ResultSerializable implements Serializable {
 
@@ -35,7 +35,7 @@ public class ResultSerializable implements Serializable {
                 String qualifierName = qualifier.getName();
                 columnFamilyMap.put(qualifierName, DataConverter.convert(
                         qualifier.getDataType(),
-                        result.getValue(BenckmarkConstans.COLUMN_FAMILY,
+                        result.getValue(BenchmarkConstans.COLUMN_FAMILY,
                                 Bytes.toBytes(qualifierName))));
             }
             hTable.put(columnFamilyName, columnFamilyMap);

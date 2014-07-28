@@ -2,15 +2,15 @@ package com.stratio.deep.benchmark.hbase.hadoop.group.reduce;
 
 import java.io.IOException;
 
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-import com.stratio.deep.benchmark.model.ContributorWritable;
+import com.google.common.collect.Iterables;
+import com.stratio.deep.benchmark.common.hadoop.model.RevisionArrayWritable;
+import com.stratio.deep.benchmark.common.hadoop.model.RevisionWritable;
 
-public class HBaseGroupReduce
-        extends
-        Reducer<ContributorWritable, NullWritable, ContributorWritable, IntWritable> {
+public class HBaseGroupReduce extends
+        Reducer<Text, RevisionWritable, Text, RevisionArrayWritable> {
 
     @Override
     protected void setup(Context context) throws IOException,
@@ -19,14 +19,12 @@ public class HBaseGroupReduce
     }
 
     @Override
-    protected void reduce(ContributorWritable key,
-            Iterable<NullWritable> values, Context context) throws IOException,
-            InterruptedException {
-        int i = 0;
-        for (NullWritable value : values) {
-            i++;
-        }
-        context.write(key, new IntWritable(i));
+    protected void reduce(Text key, Iterable<RevisionWritable> values,
+            Context context) throws IOException, InterruptedException {
+        RevisionArrayWritable revisionArray = new RevisionArrayWritable();
+        revisionArray.set(Iterables.toArray(values,
+                RevisionWritable.class));
+        context.write(key, revisionArray);
     }
 
 }

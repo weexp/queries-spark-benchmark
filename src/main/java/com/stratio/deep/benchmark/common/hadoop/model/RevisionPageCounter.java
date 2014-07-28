@@ -1,4 +1,4 @@
-package com.stratio.deep.benchmark.model;
+package com.stratio.deep.benchmark.common.hadoop.model;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -8,7 +8,7 @@ import java.util.Date;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
-import com.stratio.deep.benchmark.BenckmarkConstans;
+import com.stratio.deep.benchmark.common.BenchmarkConstans;
 
 public class RevisionPageCounter implements
         WritableComparable<RevisionPageCounter> {
@@ -23,14 +23,14 @@ public class RevisionPageCounter implements
     private String redirection;
 
     public RevisionPageCounter() {
-        this.title = BenckmarkConstans.STRING_NULL;
-        this.ts = BenckmarkConstans.DATE_NULL;
-        this.pagecounts = BenckmarkConstans.INT_NULL;
+        this.title = BenchmarkConstans.STRING_NULL;
+        this.ts = BenchmarkConstans.DATE_NULL;
+        this.pagecounts = BenchmarkConstans.INT_NULL;
         this.contributorWritable = new ContributorWritable();
-        this.isMinor = BenckmarkConstans.BOOLEAN_NULL;
+        this.isMinor = BenchmarkConstans.BOOLEAN_NULL;
         this.pageWritable = new PageWritable();
-        this.text = BenckmarkConstans.STRING_NULL;
-        this.redirection = BenckmarkConstans.STRING_NULL;
+        this.text = BenchmarkConstans.STRING_NULL;
+        this.redirection = BenchmarkConstans.STRING_NULL;
     }
 
     public RevisionPageCounter(String title, Date ts, Integer pagecounts,

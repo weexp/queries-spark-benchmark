@@ -6,7 +6,7 @@ import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
 
-import com.stratio.deep.benchmark.BenckmarkConstans;
+import com.stratio.deep.benchmark.common.BenchmarkConstans;
 import com.stratio.deep.benchmark.hbase.serialize.ResultSerializable;
 
 public class MapPageCountFunction
@@ -24,14 +24,14 @@ public class MapPageCountFunction
         ResultSerializable resultSerializable = this
                 .convertPageConterResulToSerializable(t._2());
         String title = (String) resultSerializable.getValue(
-                BenckmarkConstans.COLUMN_FAMILY_NAME,
-                BenckmarkConstans.PAGE_COUNTER_TITLE_COLUMN_NAME);
+                BenchmarkConstans.COLUMN_FAMILY_NAME,
+                BenchmarkConstans.PAGE_COUNTER_TITLE_COLUMN_NAME);
         return new Tuple2<String, ResultSerializable>(title, resultSerializable);
     }
 
     private ResultSerializable convertPageConterResulToSerializable(
             Result result) {
         return ResultSerializable.builder(result,
-                BenckmarkConstans.PAGE_COUNT_METADATA);
+                BenchmarkConstans.PAGE_COUNT_METADATA);
     }
 }

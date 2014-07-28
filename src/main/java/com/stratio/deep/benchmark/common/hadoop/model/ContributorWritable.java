@@ -1,4 +1,4 @@
-package com.stratio.deep.benchmark.model;
+package com.stratio.deep.benchmark.common.hadoop.model;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -7,7 +7,7 @@ import java.io.IOException;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
-import com.stratio.deep.benchmark.BenckmarkConstans;
+import com.stratio.deep.benchmark.common.BenchmarkConstans;
 
 public class ContributorWritable implements
         WritableComparable<ContributorWritable> {
@@ -49,9 +49,9 @@ public class ContributorWritable implements
 
     public ContributorWritable() {
         super();
-        this.id = BenckmarkConstans.INT_NULL;
-        this.username = BenckmarkConstans.STRING_NULL;
-        this.isAnonymous = BenckmarkConstans.BOOLEAN_NULL;
+        this.id = BenchmarkConstans.INT_NULL;
+        this.username = BenchmarkConstans.STRING_NULL;
+        this.isAnonymous = BenchmarkConstans.BOOLEAN_NULL;
     }
 
     public void write(DataOutput out) throws IOException {

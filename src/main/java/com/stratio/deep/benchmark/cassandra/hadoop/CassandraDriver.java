@@ -17,7 +17,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.stratio.deep.benchmark.HadoopLauncher;
+import com.stratio.deep.benchmark.common.HadoopLauncher;
 
 public class CassandraDriver extends HadoopLauncher {
 
@@ -80,27 +80,27 @@ public class CassandraDriver extends HadoopLauncher {
         // long initTime = System.currentTimeMillis();
         //
         // String joinRevJobOuputhPath = nameNodePath + "/"
-        // + BenckmarkConstans.JOIN_JOB_BENCHMARK_NAME + "/"
-        // + BenckmarkConstans.TABLE_REVISION_NAME;
+        // + BenchmarkConstans.JOIN_JOB_BENCHMARK_NAME + "/"
+        // + BenchmarkConstans.TABLE_REVISION_NAME;
         // String joinPGJobOuputhPath = nameNodePath + "/"
-        // + BenckmarkConstans.JOIN_JOB_BENCHMARK_NAME + "/"
-        // + BenckmarkConstans.TABLE_PAGE_COUNT_NAME;
+        // + BenchmarkConstans.JOIN_JOB_BENCHMARK_NAME + "/"
+        // + BenchmarkConstans.TABLE_PAGE_COUNT_NAME;
         //
-        // this.launchCassandraJob(BenckmarkConstans.TABLE_REVISION_NAME,
+        // this.launchCassandraJob(BenchmarkConstans.TABLE_REVISION_NAME,
         // new Path(joinRevJobOuputhPath),
         // CassandraRevisionForJoinMapper.class,
-        // BenckmarkConstans.NUM_PAG, Reducer.class, Text.class,
+        // BenchmarkConstans.NUM_PAG, Reducer.class, Text.class,
         // RevisionPageCounter.class, Text.class,
         // RevisionPageCounter.class);
         //
-        // this.launchCassandraJob(BenckmarkConstans.TABLE_PAGE_COUNT_NAME,
+        // this.launchCassandraJob(BenchmarkConstans.TABLE_PAGE_COUNT_NAME,
         // new Path(joinPGJobOuputhPath),
         // CassandraPageCountForJoinMapper.class,
-        // BenckmarkConstans.NUM_PAG, Reducer.class, Text.class,
+        // BenchmarkConstans.NUM_PAG, Reducer.class, Text.class,
         // RevisionPageCounter.class, Text.class,
         // RevisionPageCounter.class);
-        // this.launchHadoopJob(BenckmarkConstans.JOIN_JOB_BENCHMARK_NAME,
-        // Mapper.class, BenckmarkConstans.JOIN_JOB_BENCHMARK_NAME
+        // this.launchHadoopJob(BenchmarkConstans.JOIN_JOB_BENCHMARK_NAME,
+        // Mapper.class, BenchmarkConstans.JOIN_JOB_BENCHMARK_NAME
         // + "/JOIN/", Text.class, RevisionPageCounter.class,
         // JoinReducer.class, ContributorWritable.class,
         // NullWritable.class, joinRevJobOuputhPath, joinPGJobOuputhPath);
@@ -142,12 +142,12 @@ public class CassandraDriver extends HadoopLauncher {
         // }
         //
         // String filterJobOuputhPath = nameNodePath + "/"
-        // + BenckmarkConstans.FILTER_JOB_BENCHMARK_NAME;
+        // + BenchmarkConstans.FILTER_JOB_BENCHMARK_NAME;
         //
-        // this.launchCassandraJob(BenckmarkConstans.TABLE_PAGE_COUNT_NAME,
+        // this.launchCassandraJob(BenchmarkConstans.TABLE_PAGE_COUNT_NAME,
         // new Path(filterJobOuputhPath),
         // CassandraPageCountFilterMapper.class,
-        // BenckmarkConstans.NUM_PAG,
+        // BenchmarkConstans.NUM_PAG,
         // CassandraPageCountFilterReduce.class, IntWritable.class,
         // NullWritable.class, IntWritable.class, NullWritable.class);
         //
@@ -182,9 +182,9 @@ public class CassandraDriver extends HadoopLauncher {
         //
         // initTime = System.currentTimeMillis();
         // String groupJobOuputhPath = nameNodePath + "/"
-        // + BenckmarkConstans.GROUP_JOB_1_BENCHMARK_NAME;
+        // + BenchmarkConstans.GROUP_JOB_1_BENCHMARK_NAME;
         //
-        // this.launchHadoopJob(BenckmarkConstans.GROUP_JOB_1_BENCHMARK_NAME,
+        // this.launchHadoopJob(BenchmarkConstans.GROUP_JOB_1_BENCHMARK_NAME,
         // GroupMapper.class, groupJobOuputhPath,
         // ContributorWritable.class, NullWritable.class,
         // CassadraGroupReduce.class, ContributorWritable.class,

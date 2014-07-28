@@ -27,11 +27,6 @@ public class FunctionFilterPageCount implements Function<Cells, Boolean> {
         // if ("3".equals(String.valueOf(hour))) &&
         // ("3".equals(String.valueOf(hour)))
         // if (hour >= 19)
-        if (hour >= 19 && hour < 20) {
-            return true;
-        } else {
-            return false;
-        }
-
+        return hour >= 19 && hour < 20;
     }
 }

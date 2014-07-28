@@ -11,7 +11,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 
-import com.stratio.deep.benchmark.BenckmarkConstans;
+import com.stratio.deep.benchmark.common.BenchmarkConstans;
 
 public class CassandraPageCountFilterMapper
         extends
@@ -33,14 +33,14 @@ public class CassandraPageCountFilterMapper
             Map<String, ByteBuffer> value, Context context) throws IOException,
             InterruptedException {
 
-        Date ts = BenckmarkConstans.DATE_NULL;
-        ByteBuffer tsBB = value.get(BenckmarkConstans.PAGE_COUNTER_TS);
+        Date ts = BenchmarkConstans.DATE_NULL;
+        ByteBuffer tsBB = value.get(BenchmarkConstans.PAGE_COUNTER_TS);
         if (null != tsBB) {
             ts = DateType.instance.compose(tsBB);
             Calendar cal = Calendar.getInstance();
             cal.setTime(ts);
-            if (cal.get(Calendar.HOUR_OF_DAY) >= 3
-                    && cal.get(Calendar.HOUR_OF_DAY) <= 4) {
+            int hour = cal.get(Calendar.HOUR_OF_DAY);
+            if (hour >= 19 && hour < 20) {
                 context.write(this.keyToSend, this.valueToSend);
             }
         }

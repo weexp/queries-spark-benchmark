@@ -1,21 +1,20 @@
 package com.stratio.deep.benchmark.cassandra.spark.groupby;
 
-import com.stratio.deep.entity.Cell;
-import com.stratio.deep.entity.Cells;
 import org.apache.spark.api.java.function.Function;
 
-import java.io.Serializable;
+import com.stratio.deep.entity.Cell;
+import com.stratio.deep.entity.Cells;
 
 /**
  * Created by ParadigmaTecnologico on 24/06/2014.
  */
-public class FunctionGroupByRev implements Function<Cells, String>,
-        Serializable {
+public class FunctionGroupByRev implements Function<Cells, Cell> {
+
+    private final String cellName = "contributor_username";
+    private static final long serialVersionUID = -58288997899038056L;
 
     @Override
-    public String call(Cells cells) throws Exception {
-        Cell autorCell = cells.getCellByName("contributor_username");
-        String autor = (String) autorCell.getCellValue();
-        return autor;
+    public Cell call(Cells cells) throws Exception {
+        return cells.getCellByName(this.cellName);
     }
 }
