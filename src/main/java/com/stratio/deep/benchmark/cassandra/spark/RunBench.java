@@ -1,20 +1,5 @@
 package com.stratio.deep.benchmark.cassandra.spark;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.spark.SparkConf;
-import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
-import org.hyperic.sigar.SigarException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.stratio.deep.benchmark.cassandra.spark.filter.FunctionFilterPageCount;
 import com.stratio.deep.benchmark.cassandra.spark.groupby.FunctionGroupByRev;
 import com.stratio.deep.benchmark.cassandra.spark.groupby.FunctionMapRevGroupBy;
@@ -26,6 +11,20 @@ import com.stratio.deep.context.CassandraDeepSparkContext;
 import com.stratio.deep.entity.Cell;
 import com.stratio.deep.entity.Cells;
 import com.stratio.deep.rdd.CassandraJavaRDD;
+import org.apache.spark.SparkConf;
+import org.apache.spark.SparkContext;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import org.hyperic.sigar.SigarException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by ParadigmaTecnologico on 22/05/2014.
@@ -110,6 +109,7 @@ public class RunBench {
                 .cassandraJavaRDD(configPage);
 
         // Configuration and initialization for PageCounts with secondary index
+        /*
         ICassandraDeepJobConfig<Cells> configPageWithFilter = CassandraConfigFactory
                 .create()
                 .rpcPort(cassandraPort)
@@ -120,10 +120,13 @@ public class RunBench {
                         "lucene",
                         "{query : {type : \"range\",field : \"pagecounts\", lower : 1 , include_lower : true , upper : 4 , include_upper : false }}")
                 .initialize();
+          */
 
         // Creating the RDD for PageCounts with secondary index
+        /*
         CassandraJavaRDD<Cells> rddPageWithFilter = deepContext
                 .cassandraJavaRDD(configPageWithFilter);
+        */
 
         launchGroupByJob(rddRev, slaves, CASSANDRAHOST, pathFileG, pathG);
 
@@ -212,10 +215,13 @@ public class RunBench {
         // System.out.println("\r\n Resultados Join por campo titulo " + join+
         // "\r\n");
 
+
         time_end = System.currentTimeMillis(); // End crono
         tT = (time_end - time_start) / 1000;
         // data[i] = tT;
         // }
+
+        System.out.println("Count Join: " + join);
 
         File FileTimes_J = new File(pathJ);
         FileWriter TextOutTime_J = new FileWriter(FileTimes_J, true);
@@ -286,6 +292,8 @@ public class RunBench {
         long tT = (time_end - time_start) / 1000;
         // data[i] = tT;
         // }
+
+        System.out.println("Count GroupBy: " + results);
 
         File FileTimes_G = new File(pathG);
         FileWriter TextOutTime_G = new FileWriter(FileTimes_G, true);
