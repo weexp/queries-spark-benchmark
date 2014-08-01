@@ -67,6 +67,11 @@
 			<artifactId>hadoop-yarn-client</artifactId>
 			<version>2.2.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.stratio.deep</groupId>
+			<artifactId>deep-mongodb</artifactId>
+			<version>0.4.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -95,6 +95,22 @@ public class RunBench {
         CassandraJavaRDD<Cells> rddPage = deepContext
                 .cassandraJavaRDD(configPage);
 
+        // Configuration and initialization for PageCounts with secondary index
+        ICassandraDeepJobConfig<Cells> configPageWithFilter = CassandraConfigFactory
+                .create()
+                .rpcPort(cassandraPort)
+                .keyspace(keyspace)
+                .table(table2)
+                .bisectFactor(bisecFactor)
+                .filterByField(
+                        "lucene",
+                        "{query : {type : \"range\",field : \"pagecounts\", lower : 1 , include_lower : true , upper : 4 , include_upper : false }}")
+                .initialize();
+
+        // Creating the RDD for PageCounts with secondary index
+        CassandraJavaRDD<Cells> rddPageWithFilter = deepContext
+                .cassandraJavaRDD(configPageWithFilter);
+
         launchGroupByJob(rddRev, slaves, CASSANDRAHOST, pathFileG, pathG);
 
         // initialization files Master for Filter

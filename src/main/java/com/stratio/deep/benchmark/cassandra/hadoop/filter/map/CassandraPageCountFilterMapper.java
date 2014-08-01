@@ -1,14 +1,15 @@
 package com.stratio.deep.benchmark.cassandra.hadoop.filter.map;
 
-import com.stratio.deep.benchmark.common.BenchmarkConstans;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Map;
+
 import org.apache.cassandra.db.marshal.LongType;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
+import com.stratio.deep.benchmark.common.BenchmarkConstans;
 
 public class CassandraPageCountFilterMapper
         extends
@@ -34,9 +35,6 @@ public class CassandraPageCountFilterMapper
         ByteBuffer tsBB = value.get(BenchmarkConstans.PAGE_COUNTER_COUNT);
         if (null != tsBB) {
             counter = LongType.instance.compose(tsBB);
-            //Calendar cal = Calendar.getInstance();
-            //cal.setTime(ts);
-            //int count = cal.get(Calendar.HOUR_OF_DAY);
             if (counter >= 1 && counter < 4) {
                 context.write(this.keyToSend, this.valueToSend);
             }

@@ -1,17 +1,18 @@
 package com.stratio.deep.benchmark.hbase.hadoop.filter.map;
 
-import com.stratio.deep.benchmark.common.BenchmarkConstans;
-import com.stratio.deep.benchmark.common.hadoop.model.PageCountWritable;
+import java.io.IOException;
+import java.util.Calendar;
+
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableMapper;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.NullWritable;
 
-import java.io.IOException;
-import java.util.Calendar;
+import com.stratio.deep.benchmark.common.BenchmarkConstans;
+import com.stratio.deep.benchmark.common.hadoop.model.PageCountWritable;
 
-public class HbasePageCountMapper   extends
+public class HbasePageCountMapper extends
         TableMapper<PageCountWritable, NullWritable> {
 
     @Override
