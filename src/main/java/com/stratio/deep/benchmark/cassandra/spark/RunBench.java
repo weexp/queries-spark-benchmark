@@ -1,20 +1,5 @@
 package com.stratio.deep.benchmark.cassandra.spark;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.spark.SparkConf;
-import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
-import org.hyperic.sigar.SigarException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.stratio.deep.benchmark.cassandra.spark.filter.FunctionFilterPageCount;
 import com.stratio.deep.benchmark.cassandra.spark.groupby.FunctionGroupByRev;
 import com.stratio.deep.benchmark.cassandra.spark.groupby.FunctionMapRevGroupBy;
@@ -25,6 +10,20 @@ import com.stratio.deep.config.ICassandraDeepJobConfig;
 import com.stratio.deep.context.CassandraDeepSparkContext;
 import com.stratio.deep.entity.Cells;
 import com.stratio.deep.rdd.CassandraJavaRDD;
+import org.apache.spark.SparkConf;
+import org.apache.spark.SparkContext;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import org.hyperic.sigar.SigarException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by ParadigmaTecnologico on 22/05/2014.
@@ -61,14 +60,18 @@ public class RunBench {
         String pathJ = pathTime + "/joinTime.txt";
         int cassandraPort = 9160;
 
+
         String pathJar = new File(RunBench.class.getProtectionDomain()
                 .getCodeSource().getLocation().getPath()).getAbsolutePath();
 
-        SparkConf sparkConf = new SparkConf().set("spark.executor.memory",
-                "16g");
+        //String pathjar = "C:\\Users\\ParadigmaTecnologico\\IdeaProjects\\bench\\target\\test-proyect-1.0-SNAPSHOT.jar";
+
+        SparkConf sparkConf = new SparkConf();//.set("spark.executor.memory","2g");
         sparkConf.setMaster(cluster);
         sparkConf.setAppName(jobName);
-        sparkConf.setJars(new String[] { pathJar });
+        sparkConf.set("spark.executor.memory", "16g");
+        sparkConf.setJars(new String[]{pathJar});
+
 
         SparkContext sc = new SparkContext(sparkConf);
 
@@ -79,7 +82,9 @@ public class RunBench {
         // Configuration and initialization for Revision
         ICassandraDeepJobConfig<Cells> configRev = CassandraConfigFactory
                 .create().host(CASSANDRAHOST).rpcPort(cassandraPort)
-                .keyspace(keyspace).table(table1).bisectFactor(bisecFactor)
+                .keyspace(keyspace).table(table1).inputColumns("id","contributor_id","contributor_isanonymous","contributor_username","lucene","page_fulltitle",
+                "page_id","page_isredirect","page_ns","page_restrictions","page_title","revision_id","revision_isminor","revision_redirection",
+                "revision_timestamp").bisectFactor(bisecFactor)
                 .initialize();
 
         // Creating the RDD for Revision
@@ -88,23 +93,25 @@ public class RunBench {
 
         // Configuration and initialization for PageCounts
         ICassandraDeepJobConfig<Cells> configPage = CassandraConfigFactory
-                .create().rpcPort(cassandraPort).keyspace(keyspace)
+                .create().host(CASSANDRAHOST).rpcPort(cassandraPort).keyspace(keyspace)
                 .table(table2).bisectFactor(bisecFactor).initialize();
 
         // Creating the RDD for PageCounts
         CassandraJavaRDD<Cells> rddPage = deepContext
                 .cassandraJavaRDD(configPage);
 
+
         launchGroupByJob(rddRev, slaves, CASSANDRAHOST, pathFileG, pathG);
 
-        // initialization files Master for Filter
-        FileFilter fileFilter_M = new FileFilter(CASSANDRAHOST, pathFileF);
-        fileFilter_M.start();
-        // initialization files Slaves for Filter
-        for (int i = 9; i == args.length; i++) {
-            FileFilter fileFilter_S = new FileFilter(slaves.get(i), pathFileF);
-            fileFilter_S.start();
-        }
+
+ // initialization files Master for Filter
+ FileFilter fileFilter_M = new FileFilter(CASSANDRAHOST, pathFileF);
+ fileFilter_M.start();
+ // initialization files Slaves for Filter
+ for (int i = 9; i == args.length; i++) {
+ FileFilter fileFilter_S = new FileFilter(slaves.get(i), pathFileF);
+ fileFilter_S.start();
+ }
 
         // FILTER
         // for (int i = 0; i < runs; i++) {
@@ -128,6 +135,7 @@ public class RunBench {
         FileWriter TextOutTime_F = new FileWriter(FileTimes_F, true);
         TextOutTime_F.write("RESPONSE TIME FILTER: " + tT + " ");
         TextOutTime_F.close();
+
         // Calculate max
         // Bench benchMaxF = new Bench();
         // String.format("%.2f", benchMaxF.max(data, runs));
@@ -140,22 +148,22 @@ public class RunBench {
         // Bench benchAvgF = new Bench();
         // String.format("%.2f", benchAvgF.media(data, runs));
 
-        // stop files Master for Filter
-        fileFilter_M.stop();
-        // stop files Slaves for Filter
-        for (int i = 9; i == args.length; i++) {
-            FileFilter fileFilter_S = new FileFilter(slaves.get(i), pathFileF);
-            fileFilter_S.stop();
-        }
+ // stop file Master for Filter
+ fileFilter_M.stop();
+ // stop files Slaves for Filter
+ for (int i = 9; i == args.length; i++) {
+ FileFilter fileFilter_S = new FileFilter(slaves.get(i), pathFileF);
+ fileFilter_S.stop();
+ }
 
-        // initialization files Master for Join
-        FileJoin fileJoin_M = new FileJoin(args[0], pathFileJ);
-        fileJoin_M.start();
-        // initialization files Slaves for Join
-        for (int i = 8; i == args.length; i++) {
-            FileJoin fileJoin_S = new FileJoin(slaves.get(i), pathFileJ);
-            fileJoin_S.start();
-        }
+ // initialization files Master for Join
+ FileJoin fileJoin_M = new FileJoin(args[0], pathFileJ);
+ fileJoin_M.start();
+ // initialization files Slaves for Join
+ for (int i = 9; i == args.length; i++) {
+ FileJoin fileJoin_S = new FileJoin(slaves.get(i), pathFileJ);
+ fileJoin_S.start();
+ }
 
         // JOIN
         // for (int i = 0; i < runs; i++) {
@@ -204,21 +212,24 @@ public class RunBench {
         // String.format("%.2f", benchAvgJ.media(data, runs));
 
         // stop files Master for Join
-        fileJoin_M.stop();
-        // stop files Salve for Join
-        for (int i = 8; i == args.length; i++) {
-            FileJoin fileJoin_S = new FileJoin(slaves.get(i), pathFileJ);
-            fileJoin_S.stop();
-        }
+
+ // stop file Master for Join
+ fileJoin_M.stop();
+ // stop files Salve for Join
+ for (int i = 9; i == args.length; i++) {
+ FileJoin fileJoin_S = new FileJoin(slaves.get(i), pathFileJ);
+ fileJoin_S.stop();
+ }
 
         deepContext.stop();
 
         System.exit(0);
     }
 
+
     private static void launchGroupByJob(CassandraJavaRDD rddRev,
-            List<String> slaves, String CASSANDRAHOST, String pathFileG,
-            String pathG) throws IOException {
+                                         List<String> slaves, String CASSANDRAHOST, String pathFileG,
+                                         String pathG) throws IOException {
         // initialization files Master for Group
         FileGroup fileGroup_M = new FileGroup(CASSANDRAHOST, pathFileG);
         fileGroup_M.start();
@@ -234,21 +245,19 @@ public class RunBench {
 
         // Function: GroupBy
 
-        JavaPairRDD<String, Iterable<Cells>> groups = rddRev
-                .groupBy(new FunctionGroupByRev());
-        JavaPairRDD<String, Integer> counts = groups
-                .mapToPair(new FunctionMapRevGroupBy());
+        JavaPairRDD<String, Iterable<Cells>> groups = rddRev.groupBy(new FunctionGroupByRev());
+        JavaPairRDD<String, Integer> counts = groups.mapToPair(new FunctionMapRevGroupBy());
 
         // List<Tuple2<String, Integer>> results = counts.collect();
         long results = counts.count();
 
         // System.out.println("\r\n Resultados GroupBy " + results + "\r\n");
-        /*
-         * for (Tuple2 <String,Integer> tuple:results){
-         * System.out.println("\r\n Contributor "
-         * +tuple._1()+" numero de articulos a su nombre " +tuple._2()+ "\r\n");
-         * }
-         */
+
+         // for (Tuple2 <String,Integer> tuple:results){
+         // System.out.println("\r\n Contributor "
+         // +tuple._1()+" numero de articulos a su nombre " +tuple._2()+ "\r\n");
+         // }
+
 
         long time_end = System.currentTimeMillis(); // End crono
         long tT = (time_end - time_start) / 1000;
@@ -280,4 +289,5 @@ public class RunBench {
         }
 
     }
+
 }
