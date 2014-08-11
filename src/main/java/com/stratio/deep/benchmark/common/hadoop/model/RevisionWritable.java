@@ -17,7 +17,7 @@ public class RevisionWritable implements WritableComparable<RevisionWritable> {
     private ContributorWritable contributorWritable;
     private Boolean isMinor;
     private PageWritable pageWritable;
-    private Text text;
+    private String text;
     private String redirection;
     private Date ts;
 
@@ -25,7 +25,7 @@ public class RevisionWritable implements WritableComparable<RevisionWritable> {
         this.contributorWritable = new ContributorWritable();
         this.isMinor = BenchmarkConstans.BOOLEAN_NULL;
         this.pageWritable = new PageWritable();
-        this.text = BenchmarkConstans.TEXT_NULL;
+        this.text = BenchmarkConstans.STRING_NULL;
         this.redirection = BenchmarkConstans.STRING_NULL;
         this.ts = BenchmarkConstans.DATE_NULL;
         this.id = new UUIDWritable(BenchmarkConstans.UUID_BLANK);
@@ -38,7 +38,7 @@ public class RevisionWritable implements WritableComparable<RevisionWritable> {
         this.contributorWritable = contributorWritable;
         this.isMinor = isMinor;
         this.pageWritable = pageWritable;
-        this.text = text;
+        this.text = text.toString();
         this.redirection = redirection;
         this.id = new UUIDWritable(id);
         this.ts = new Date(ts);
@@ -61,11 +61,7 @@ public class RevisionWritable implements WritableComparable<RevisionWritable> {
     }
 
     public Text getText() {
-        return this.text;
-    }
-
-    public ContributorWritable getContributorWritable() {
-        return this.contributorWritable;
+        return new Text(this.text);
     }
 
     public PageWritable getPageWritable() {
@@ -73,7 +69,7 @@ public class RevisionWritable implements WritableComparable<RevisionWritable> {
     }
 
     public void setText(Text text) {
-        this.text = text;
+        this.text = text.toString();
     }
 
     public String getRedirection() {
@@ -109,7 +105,7 @@ public class RevisionWritable implements WritableComparable<RevisionWritable> {
         this.contributorWritable.write(out);
         out.writeBoolean(this.isMinor);
         this.pageWritable.write(out);
-        this.text.write(out);
+        Text.writeString(out, this.text);
         Text.writeString(out, this.redirection);
         out.writeLong(this.ts.getTime());
     }
@@ -120,10 +116,10 @@ public class RevisionWritable implements WritableComparable<RevisionWritable> {
         this.isMinor = in.readBoolean();
         this.pageWritable.readFields(in);
         try {
-            this.text.readFields(in);
+            this.text = Text.readString(in);
             this.ts = new Date(in.readLong());
         } catch (IndexOutOfBoundsException e) {
-            this.text = new Text("");
+            this.text = " ";
             this.ts = new Date(0l);
         }
     }

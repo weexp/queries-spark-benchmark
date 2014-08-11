@@ -2,18 +2,19 @@ package com.stratio.deep.benchmark.cassandra.spark.groupby;
 
 import org.apache.spark.api.java.function.Function;
 
-import com.stratio.deep.entity.Cells;
+import com.datastax.spark.connector.CassandraRow;
 
 /**
  * Created by ParadigmaTecnologico on 24/06/2014.
  */
-public class FunctionGroupByRev implements Function<Cells, String> {
+public class FunctionDatastaxtGroupByRev implements
+        Function<CassandraRow, String> {
 
     private final String cellName = "contributor_username";
     private static final long serialVersionUID = -58288997899038056L;
 
     @Override
-    public String call(Cells cells) throws Exception {
-        return (String) cells.getCellByName(this.cellName).getCellValue();
+    public String call(CassandraRow row) throws Exception {
+        return row.getString(this.cellName);
     }
 }

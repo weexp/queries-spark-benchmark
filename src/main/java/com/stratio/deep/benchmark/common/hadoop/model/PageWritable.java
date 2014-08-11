@@ -3,20 +3,25 @@ package com.stratio.deep.benchmark.common.hadoop.model;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
 import com.stratio.deep.benchmark.common.BenchmarkConstans;
 
-public class PageWritable implements Writable {
+public class PageWritable implements Writable, Serializable {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -6066314496577369976L;
     private String namespace;
     private String title;
     private String fullTitle;
     private Integer id;
     private Boolean isRedirect;
-    private Text restrictions;
+    private transient Text restrictions;
 
     public PageWritable() {
         super();
