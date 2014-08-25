@@ -23,19 +23,19 @@ public class GroupMapper
             InterruptedException {
         Integer contributorId = -1;
         ByteBuffer contributorIdBB = value
-                .get(BenchmarkConstans.CONTRIBUTOR_ID);
+                .get(BenchmarkConstans.CONTRIBUTOR_ID_COLUMN_NAME);
         if (null != contributorIdBB) {
             contributorId = Int32Type.instance.compose(contributorIdBB);
         }
         String username = BenchmarkConstans.STRING_NULL;
         ByteBuffer usernameBB = value
-                .get(BenchmarkConstans.CONTRIBUTOR_USER_NAME);
+                .get(BenchmarkConstans.CONTRIBUTOR_USERNAME_COLUMN_NAME);
         if (null != usernameBB) {
             username = UTF8Type.instance.compose(usernameBB);
         }
         Boolean isAnonymous = false;
         ByteBuffer isAnonymousBB = value
-                .get(BenchmarkConstans.CONTRIBUTOR_IS_ANONYMOUS);
+                .get(BenchmarkConstans.CONTRIBUTOR_ISANONYMOUS_COLUMN_NAME);
         if (null != isAnonymousBB) {
             isAnonymous = BooleanType.instance.compose(isAnonymousBB);
         }

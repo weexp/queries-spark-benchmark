@@ -80,6 +80,71 @@ public class RunBench {
                 sc);
         try {
             // Configuration and initialization for Revision
+            // initialization files Master for Filter
+            // FileFilter fileFilter_M = new FileFilter(CASSANDRAHOST,
+            // pathFileF);
+            // fileFilter_M.start();
+            // initialization files Slaves for Filter
+            // for (int i = 9; i == args.length; i++) {
+            // FileFilter fileFilter_S = new FileFilter(slaves.get(i),
+            // pathFileF);
+            // fileFilter_S.start();
+            // }
+
+            // Configuration and initialization for PageCounts
+            ICassandraDeepJobConfig<Cells> configPage = CassandraConfigFactory
+                    .create().host(CASSANDRAHOST).rpcPort(cassandraPort)
+                    .keyspace(keyspace).table(table2).bisectFactor(bisecFactor)
+                    .initialize();
+
+            // Creating the RDD for PageCounts
+            CassandraJavaRDD<Cells> rddPage = deepContext
+                    .cassandraJavaRDD(configPage);
+
+            // FILTER
+            // for (int i = 0; i < runs; i++) {
+            time_start = System.currentTimeMillis(); // Start Crono
+
+            // Function Filter: FunctionFilterPageCount -> count pages in a
+            // limit times
+            JavaRDD<Cells> filtrado = rddPage
+                    .filter(new FunctionFilterPageCount());
+
+            System.out.println("\r\n Resultados Filter " + filtrado.count()
+                    + "\r\n");
+            // Configuration and initialization for PageCounts with secondary
+            // index
+            time_end = System.currentTimeMillis(); // End crono
+            tT = (time_end - time_start) / 1000d;
+            long timeS2IStart = System.currentTimeMillis();
+            ICassandraDeepJobConfig<Cells> configPageWithFilter = CassandraConfigFactory
+                    .create()
+                    .rpcPort(cassandraPort)
+                    .keyspace(keyspace)
+                    .table(table2)
+                    .bisectFactor(bisecFactor)
+                    .filterByField(
+                            "lucene",
+                            "{filter : {type : \"range\",field : \"pagecounts\", lower : 199 , include_lower : true , upper : 201 , include_upper : false }}")
+                    .pageSize(10000).initialize();
+
+            // Creating the RDD for PageCounts with secondary index
+
+            CassandraJavaRDD<Cells> rddPageWithFilter = deepContext
+                    .cassandraJavaRDD(configPageWithFilter);
+            System.out.println("Secondary Index Filter "
+                    + rddPageWithFilter.count());
+            long timeS2IStop = System.currentTimeMillis();
+            // data[i] = tT;
+            // }
+
+            File FileTimes_F = new File(pathF);
+            FileWriter TextOutTime_F = new FileWriter(FileTimes_F, true);
+            TextOutTime_F.write("RESPONSE TIME FILTER: " + tT + " ");
+            TextOutTime_F.write("RESPONSE TIME FILTER WITH 2I: "
+                    + (timeS2IStop - timeS2IStart) / 1000d + " ");
+            TextOutTime_F.close();
+
             ICassandraDeepJobConfig<Cells> configRev = CassandraConfigFactory
                     .create()
                     .host(CASSANDRAHOST)
@@ -98,72 +163,7 @@ public class RunBench {
             CassandraJavaRDD<Cells> rddRev = deepContext
                     .cassandraJavaRDD(configRev);
 
-            // Configuration and initialization for PageCounts
-            ICassandraDeepJobConfig<Cells> configPage = CassandraConfigFactory
-                    .create().host(CASSANDRAHOST).rpcPort(cassandraPort)
-                    .keyspace(keyspace).table(table2).bisectFactor(bisecFactor)
-                    .initialize();
-
-            // Creating the RDD for PageCounts
-            CassandraJavaRDD<Cells> rddPage = deepContext
-                    .cassandraJavaRDD(configPage);
-
             launchGroupByJob(rddRev, slaves, CASSANDRAHOST, pathFileG, pathG);
-
-            // initialization files Master for Filter
-            // FileFilter fileFilter_M = new FileFilter(CASSANDRAHOST,
-            // pathFileF);
-            // fileFilter_M.start();
-            // initialization files Slaves for Filter
-            // for (int i = 9; i == args.length; i++) {
-            // FileFilter fileFilter_S = new FileFilter(slaves.get(i),
-            // pathFileF);
-            // fileFilter_S.start();
-            // }
-
-            // FILTER
-            // for (int i = 0; i < runs; i++) {
-            time_start = System.currentTimeMillis(); // Start Crono
-
-            // Function Filter: FunctionFilterPageCount -> count pages in a
-            // limit times
-            JavaRDD<Cells> filtrado = rddPage
-                    .filter(new FunctionFilterPageCount());
-
-            System.out.println("\r\n Resultados Filter " + filtrado.count()
-                    + "\r\n");
-            // Configuration and initialization for PageCounts with secondary
-            // index
-            time_end = System.currentTimeMillis(); // End crono
-            tT = (time_end - time_start) / 1000;
-            long timeS2IStart = System.currentTimeMillis();
-            ICassandraDeepJobConfig<Cells> configPageWithFilter = CassandraConfigFactory
-                    .create()
-                    .rpcPort(cassandraPort)
-                    .keyspace(keyspace)
-                    .table(table2)
-                    .bisectFactor(bisecFactor)
-                    .filterByField(
-                            "lucene",
-                            "{query : {type : \"range\",field : \"pagecounts\", lower : 1 , include_lower : true , upper : 4 , include_upper : false }}")
-                    .initialize();
-
-            // Creating the RDD for PageCounts with secondary index
-
-            CassandraJavaRDD<Cells> rddPageWithFilter = deepContext
-                    .cassandraJavaRDD(configPageWithFilter);
-            System.out.println("Secondary Index Filter "
-                    + rddPageWithFilter.count());
-            long timeS2IStop = System.currentTimeMillis();
-            // data[i] = tT;
-            // }
-
-            File FileTimes_F = new File(pathF);
-            FileWriter TextOutTime_F = new FileWriter(FileTimes_F, true);
-            TextOutTime_F.write("RESPONSE TIME FILTER: " + tT + " ");
-            TextOutTime_F.write("RESPONSE TIME FILTER WITH 2I: "
-                    + (timeS2IStop - timeS2IStart) / 1000 + " ");
-            TextOutTime_F.close();
 
             // Calculate max
             // Bench benchMaxF = new Bench();
@@ -303,7 +303,7 @@ public class RunBench {
         // }
 
         long time_end = System.currentTimeMillis(); // End crono
-        long tT = (time_end - time_start) / 1000;
+        double tT = (time_end - time_start) / 1000d;
         // data[i] = tT;
         // }
 

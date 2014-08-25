@@ -15,6 +15,6 @@ public class FunctionFilterPageCount implements Function<Cells, Boolean> {
 
         Cell pageCell = cells.getCellByName("pagecounts");
         Integer numPage = (Integer) pageCell.getCellValue();
-        return numPage >= 2 && numPage < 4;
+        return numPage >= 199 && numPage < 201;
     }
 }

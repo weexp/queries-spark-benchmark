@@ -26,8 +26,6 @@ import com.stratio.deep.benchmark.common.hadoop.model.PageCountWritable;
 import com.stratio.deep.benchmark.common.hadoop.model.RevisionPageCounter;
 import com.stratio.deep.benchmark.common.hadoop.model.RevisionWritable;
 import com.stratio.deep.benchmark.common.hadoop.model.UUIDWritable;
-import com.stratio.deep.benchmark.hdfs.hadoop.filter.map.HDFSPageCountFilterMapper;
-import com.stratio.deep.benchmark.hdfs.hadoop.filter.reduce.CassandraPageCountFilterReduce;
 import com.stratio.deep.benchmark.hdfs.hadoop.group.map.GroupMapper;
 import com.stratio.deep.benchmark.hdfs.hadoop.join.map.PageCountJoinMapper;
 import com.stratio.deep.benchmark.hdfs.hadoop.join.map.RevisionJoinMapper;
@@ -87,15 +85,15 @@ public class HDFSDriver extends HadoopLauncher {
                 UUIDWritable.class,
                 PageCountWritable.class,
                 new SequenceFileOutputFormat<UUIDWritable, PageCountWritable>(),
-                12, this.getClass(), pageCountInputPath);
+                48, this.getClass(), pageCountInputPath);
 
-        this.launchHadoopJob(BenchmarkConstans.FILTER_JOB_BENCHMARK_NAME,
-                HDFSPageCountFilterMapper.class, filterJobOuputhPath,
-                PageCountWritable.class, IntWritable.class,
-                CassandraPageCountFilterReduce.class, PageCountWritable.class,
-                IntWritable.class,
-                new TextOutputFormat<PageCountWritable, IntWritable>(), 12,
-                this.getClass(), filterLoadHDFSDataOutput);
+        // this.launchHadoopJob(BenchmarkConstans.FILTER_JOB_BENCHMARK_NAME,
+        // HDFSPageCountFilterMapper.class, filterJobOuputhPath,
+        // PageCountWritable.class, IntWritable.class,
+        // CassandraPageCountFilterReduce.class, PageCountWritable.class,
+        // IntWritable.class,
+        // new TextOutputFormat<PageCountWritable, IntWritable>(), 48,
+        // this.getClass(), filterLoadHDFSDataOutput);
 
         long endTime = System.currentTimeMillis();
 
@@ -133,7 +131,7 @@ public class HDFSDriver extends HadoopLauncher {
                 UUIDWritable.class, RevisionWritable.class, Reducer.class,
                 UUIDWritable.class, RevisionWritable.class,
                 new SequenceFileOutputFormat<UUIDWritable, RevisionWritable>(),
-                12, this.getClass(), revisionInputPath);
+                48, this.getClass(), revisionInputPath);
         String hdfsYoEntityJoin = "joinHDfsToenity";
         String joinLoadPGHDFSDataOutput = "loadHDFSJPageCountData";
         this.launchHadoopTextJob(
@@ -146,7 +144,7 @@ public class HDFSDriver extends HadoopLauncher {
                 UUIDWritable.class,
                 PageCountWritable.class,
                 new SequenceFileOutputFormat<UUIDWritable, PageCountWritable>(),
-                12, this.getClass(), pageCountInputPath);
+                48, this.getClass(), pageCountInputPath);
 
         MultipleInputs.addInputPath(job, new Path(joinLoadPGHDFSDataOutput),
                 SequenceFileInputFormat.class, PageCountJoinMapper.class);
@@ -188,7 +186,7 @@ public class HDFSDriver extends HadoopLauncher {
                 UUIDWritable.class, RevisionWritable.class, Reducer.class,
                 UUIDWritable.class, RevisionWritable.class,
                 new SequenceFileOutputFormat<UUIDWritable, RevisionWritable>(),
-                12, this.getClass(), revisionInputPath);
+                48, this.getClass(), revisionInputPath);
 
         String groupJobOuputhPath = nameNodePath + "/"
                 + BenchmarkConstans.GROUP_JOB_1_BENCHMARK_NAME;
@@ -198,7 +196,7 @@ public class HDFSDriver extends HadoopLauncher {
                 ContributorWritable.class, NullWritable.class,
                 CassadraGroupReduce.class, ContributorWritable.class,
                 IntWritable.class,
-                new TextOutputFormat<ContributorWritable, IntWritable>(), 12,
+                new TextOutputFormat<ContributorWritable, IntWritable>(), 48,
                 this.getClass(), revGroupLoadHDFSDataOutput);
         endTime = System.currentTimeMillis();
         logger.info("GroupBy used Cassandra takes:"

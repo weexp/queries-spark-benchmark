@@ -3,7 +3,6 @@ package com.stratio.deep.benchmark.common;
 import java.util.Date;
 import java.util.UUID;
 
-import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 
@@ -32,34 +31,34 @@ public class BenchmarkConstans {
     public static final String PAGE_COUNTS_PAGECOUNTS_COLUMN_NAME = "pagecounts";
     public static final String PAGE_COUNTS_TS_COLUMN_NAME = "ts";
 
-    public static final byte[] TOKENS_COLUMN_FAMILY = Bytes.toBytes("t");
-    public static final byte[] LTOKENS_COLUMN_FAMILY = Bytes.toBytes("lt");
-    public static final byte[] PAGE_RESTRICTIONS = Bytes
-            .toBytes(PAGE_RESTRICTIONS_COLUMN_NAME);
-    public static final byte[] PAGE_IS_REDIRECT = Bytes
-            .toBytes(PAGE_ISREDIRECT_COLUMN_NAME);
-    public static final byte[] CONTRIBUTOR_ID = Bytes
-            .toBytes(CONTRIBUTOR_ID_COLUMN_NAME);
-    public static final byte[] CONTRIBUTOR_USER_NAME = Bytes
-            .toBytes(CONTRIBUTOR_USERNAME_COLUMN_NAME);
-    public static final byte[] CONTRIBUTOR_IS_ANONYMOUS = Bytes
-            .toBytes(CONTRIBUTOR_ISANONYMOUS_COLUMN_NAME);
-    public static final byte[] ID = Bytes.toBytes(ID_COLUMN_NAME);
-    public static final byte[] REVISION_ID = Bytes
-            .toBytes(REVISION_ID_COLUMN_NAME);
-    public static final byte[] REVISION_IS_MINOR = Bytes
-            .toBytes(REVISION_ISMINOR_COLUMN_NAME);
-    public static final byte[] REVISION_REDIRECTION = Bytes
-            .toBytes(REVISION_REDIRECTION_COLUMN_NAME);
-    public static final byte[] REVISION_TEXT = Bytes
-            .toBytes(REVISION_TEXT_COLUMN_NAME);
-
-    public static final byte[] PAGE_COUNTER_TITLE = Bytes
-            .toBytes(PAGE_COUNTER_TITLE_COLUMN_NAME);
-    public static final byte[] PAGE_COUNTER_TS = Bytes
-            .toBytes(PAGE_COUNTS_TS_COLUMN_NAME);
-    public static final byte[] PAGE_COUNTER_COUNT = Bytes
-            .toBytes(PAGE_COUNTS_PAGECOUNTS_COLUMN_NAME);
+    // public static final byte[] TOKENS_COLUMN_FAMILY = Bytes.toBytes("t");
+    // public static final byte[] LTOKENS_COLUMN_FAMILY = Bytes.toBytes("lt");
+    // public static final byte[] PAGE_RESTRICTIONS = Bytes
+    // .toBytes(PAGE_RESTRICTIONS_COLUMN_NAME);
+    // public static final byte[] PAGE_IS_REDIRECT = Bytes
+    // .toBytes(PAGE_ISREDIRECT_COLUMN_NAME);
+    // public static final byte[] CONTRIBUTOR_ID = Bytes
+    // .toBytes(CONTRIBUTOR_ID_COLUMN_NAME);
+    // public static final byte[] CONTRIBUTOR_USER_NAME = Bytes
+    // .toBytes(CONTRIBUTOR_USERNAME_COLUMN_NAME);
+    // public static final byte[] CONTRIBUTOR_IS_ANONYMOUS = Bytes
+    // .toBytes(CONTRIBUTOR_ISANONYMOUS_COLUMN_NAME);
+    // public static final byte[] ID = Bytes.toBytes(ID_COLUMN_NAME);
+    // public static final byte[] REVISION_ID = Bytes
+    // .toBytes(REVISION_ID_COLUMN_NAME);
+    // public static final byte[] REVISION_IS_MINOR = Bytes
+    // .toBytes(REVISION_ISMINOR_COLUMN_NAME);
+    // public static final byte[] REVISION_REDIRECTION = Bytes
+    // .toBytes(REVISION_REDIRECTION_COLUMN_NAME);
+    // public static final byte[] REVISION_TEXT = Bytes
+    // .toBytes(REVISION_TEXT_COLUMN_NAME);
+    //
+    // public static final byte[] PAGE_COUNTER_TITLE = Bytes
+    // .toBytes(PAGE_COUNTER_TITLE_COLUMN_NAME);
+    // public static final byte[] PAGE_COUNTER_TS = Bytes
+    // .toBytes(PAGE_COUNTS_TS_COLUMN_NAME);
+    // public static final byte[] PAGE_COUNTER_COUNT = Bytes
+    // .toBytes(PAGE_COUNTS_PAGECOUNTS_COLUMN_NAME);
     public static final Integer INT_NULL = -1;
     public static final Long LONG_NULL = -1l;
     public static final String STRING_NULL = "";
@@ -111,20 +110,20 @@ public class BenchmarkConstans {
                             DataType.String), new HQualifiersMetadata(
                             REVISION_TS, DataType.Date)));
     public static final String PAGE_COUNT_TS_COLUMN_NAME = PAGE_COUNTS_TS_COLUMN_NAME;
-    public static final byte[] PAGE_COUNT_TS = Bytes
-            .toBytes(PAGE_COUNT_TS_COLUMN_NAME);
+    // public static final byte[] PAGE_COUNT_TS = Bytes
+    // .toBytes(PAGE_COUNT_TS_COLUMN_NAME);
     public static final String GROUP_JOB_1_BENCHMARK_NAME = "groupJobBenchMark1";
     public static final String GROUP_JOB_2_BENCHMARK_NAME = "groupJobBenchMark2";
-    public static final byte[] PAGE_TITLE = Bytes
-            .toBytes(PAGE_TITLE_COLUMN_NAME);
-    public static final byte[] PAGE_ID = Bytes.toBytes(PAGE_ID_COLUMN_NAME);
-    public static final byte[] PAGE_NS = Bytes.toBytes(PAGE_NS_COLUMN_NAME);
-    public static final byte[] PAGE_FULL_TITLE = Bytes
-            .toBytes(PAGE_FULL_TITLE_COLUMN_NAME);
+    // public static final byte[] PAGE_TITLE = Bytes
+    // .toBytes(PAGE_TITLE_COLUMN_NAME);
+    // public static final byte[] PAGE_ID = Bytes.toBytes(PAGE_ID_COLUMN_NAME);
+    // public static final byte[] PAGE_NS = Bytes.toBytes(PAGE_NS_COLUMN_NAME);
+    // public static final byte[] PAGE_FULL_TITLE = Bytes
+    // .toBytes(PAGE_FULL_TITLE_COLUMN_NAME);
     public static final String NUM_PAG = "1000";
-
-    public static final byte[] COLUMN_FAMILY = Bytes
-            .toBytes(COLUMN_FAMILY_NAME);
+    //
+    // public static final byte[] COLUMN_FAMILY = Bytes
+    // .toBytes(COLUMN_FAMILY_NAME);
 
     public static final IntWritable KEY_COUNTERS = new IntWritable(0);
 

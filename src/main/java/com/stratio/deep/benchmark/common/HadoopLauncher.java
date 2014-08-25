@@ -62,7 +62,7 @@ public abstract class HadoopLauncher extends Configured implements Tool {
         Job job = Job.getInstance(this.getConf(), jobName);
         job.setJarByClass(mainClass);
         job.setOutputFormatClass(outputFormat.getClass());
-        job.setInputFormatClass(SequenceFileInputFormat.class);
+        job.setInputFormatClass(TextInputFormat.class);
         Path[] paths = new Path[inputPath.length];
         int i = 0;
         for (String s : inputPath) {
@@ -71,10 +71,10 @@ public abstract class HadoopLauncher extends Configured implements Tool {
         }
         TextInputFormat.setInputPaths(job, paths);
         job.setReducerClass(reducerClass);
-        job.setMapOutputKeyClass(keyToSend);
-        job.setMapOutputValueClass(valueToSend);
-        job.setOutputKeyClass(keyReduce);
-        job.setOutputValueClass(valueReduce);
+        // job.setMapOutputKeyClass(keyToSend);
+        // job.setMapOutputValueClass(valueToSend);
+        // job.setOutputKeyClass(keyReduce);
+        // job.setOutputValueClass(valueReduce);
         O.setOutputPath(job, new Path(jobOuputhPath));
         job.setNumReduceTasks(numReduce);
         job.waitForCompletion(true);

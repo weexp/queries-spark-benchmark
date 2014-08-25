@@ -13,6 +13,6 @@ public class FunctionFilterDatastaxtPageCount implements
     @Override
     public Boolean call(CassandraRow row) throws Exception {
         Integer numPage = row.getInt("pagecounts");
-        return numPage >= 2 && numPage < 4;
+        return numPage >= 199 && numPage < 201;
     }
 }

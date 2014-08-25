@@ -86,7 +86,7 @@ public class RunDataStaxtBench {
             // data[i] = tT;
             // }
 
-            File FileTimes_F = new File(pathTimes);
+            File FileTimes_F = new File(pathTimes + "/Filter.txt");
             FileWriter TextOutTime_F = new FileWriter(FileTimes_F, true);
             TextOutTime_F.write("RESPONSE TIME FILTER: " + tT + " ");
             TextOutTime_F.close();
@@ -106,7 +106,7 @@ public class RunDataStaxtBench {
 
             System.out.println("Count Join: " + join);
 
-            File FileTimes_J = new File(pathTimes);
+            File FileTimes_J = new File(pathTimes + "/Join.txt");
             FileWriter TextOutTime_J = new FileWriter(FileTimes_J, true);
             TextOutTime_J.write("RESPONSE TIME JOIN: " + tT + " ");
             TextOutTime_J.close();
@@ -134,7 +134,7 @@ public class RunDataStaxtBench {
 
         System.out.println("Count GroupBy: " + results);
 
-        File FileTimes_G = new File(pathTimes);
+        File FileTimes_G = new File(pathTimes + "/Group.txt");
         FileWriter TextOutTime_G = new FileWriter(FileTimes_G, true);
         TextOutTime_G.write("RESPONSE TIME GROUPBY: " + tT + " ");
         TextOutTime_G.close();

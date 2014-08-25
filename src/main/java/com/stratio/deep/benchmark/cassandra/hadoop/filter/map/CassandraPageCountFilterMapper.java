@@ -32,10 +32,11 @@ public class CassandraPageCountFilterMapper
             InterruptedException {
 
         Long counter = BenchmarkConstans.LONG_NULL;
-        ByteBuffer tsBB = value.get(BenchmarkConstans.PAGE_COUNTER_COUNT);
+        ByteBuffer tsBB = value
+                .get(BenchmarkConstans.PAGE_COUNTS_PAGECOUNTS_COLUMN_NAME);
         if (null != tsBB) {
             counter = LongType.instance.compose(tsBB);
-            if (counter >= 1 && counter < 4) {
+            if (counter >= 2 && counter < 4) {
                 context.write(this.keyToSend, this.valueToSend);
             }
         }

@@ -32,26 +32,26 @@ public class CassandraPageCountForJoinMapper
             InterruptedException {
         String title = BenchmarkConstans.STRING_NULL;
         ByteBuffer titleBB = value
-                .get(BenchmarkConstans.PAGE_COUNTER_TITLE);
+                .get(BenchmarkConstans.PAGE_COUNTER_TITLE_COLUMN_NAME);
         if (null != titleBB) {
             title = UTF8Type.instance.compose(titleBB);
         }
         Long ts = BenchmarkConstans.LONG_NULL;
-        ByteBuffer tsBB = value.get(BenchmarkConstans.PAGE_COUNTER_TS);
+        ByteBuffer tsBB = value
+                .get(BenchmarkConstans.PAGE_COUNTS_TS_COLUMN_NAME);
         if (null != tsBB) {
             ts = LongType.instance.compose(tsBB);
         }
         Integer pagecounts = BenchmarkConstans.INT_NULL;
         ByteBuffer pageCountsBB = value
-                .get(BenchmarkConstans.PAGE_COUNTER_COUNT);
+                .get(BenchmarkConstans.PAGE_COUNTS_PAGECOUNTS_COLUMN_NAME);
         if (null != pageCountsBB) {
             pagecounts = Int32Type.instance.compose(pageCountsBB);
         }
         context.write(new Text(title), new RevisionPageCounter(title, new Date(
                 ts), pagecounts, new ContributorWritable(),
                 BenchmarkConstans.BOOLEAN_NULL, new PageWritable(),
-                BenchmarkConstans.STRING_NULL,
-                BenchmarkConstans.STRING_NULL));
+                BenchmarkConstans.STRING_NULL, BenchmarkConstans.STRING_NULL));
     }
 
     @Override

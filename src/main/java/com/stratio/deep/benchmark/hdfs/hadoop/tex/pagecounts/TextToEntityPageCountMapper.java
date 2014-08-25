@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.log4j.Logger;
 
 import com.stratio.deep.benchmark.common.BenchmarkConstans;
 import com.stratio.deep.benchmark.common.hadoop.model.DataType;
@@ -14,10 +15,15 @@ import com.stratio.deep.benchmark.common.hadoop.model.UUIDWritable;
 public class TextToEntityPageCountMapper extends
         Mapper<IntWritable, Text, UUIDWritable, PageCountWritable> {
 
+    Logger log = Logger.getLogger(TextToEntityPageCountMapper.class);
+
     @Override
     protected void map(IntWritable key, Text value, Context context)
             throws IOException, InterruptedException {
+        this.log.info("procesing line: " + value);
+
         String[] split = value.toString().split("\t");
+
         PageCountWritable pg = new PageCountWritable(new Long(this.nvl(
                 split[3], DataType.Long)), split[2], new Integer(this.nvl(
                 split[1], DataType.Integer)));

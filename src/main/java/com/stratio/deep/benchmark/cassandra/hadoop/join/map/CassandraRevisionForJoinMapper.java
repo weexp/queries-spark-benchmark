@@ -43,7 +43,7 @@ public class CassandraRevisionForJoinMapper
             pageId = Int32Type.instance.compose(pageIdBB);
         }
         UUID id = null;
-        ByteBuffer idBB = value.get(BenchmarkConstans.ID);
+        ByteBuffer idBB = value.get(BenchmarkConstans.ID_COLUMN_NAME);
         if (null != idBB) {
             id = UUIDType.instance.compose(idBB);
         }
@@ -76,41 +76,41 @@ public class CassandraRevisionForJoinMapper
         ByteBuffer isMinorBB = value
                 .get(BenchmarkConstans.REVISION_ISMINOR_COLUMN_NAME);
         if (null != isMinorBB) {
-            isMinor = BooleanType.instance.compose(value.get(
-
-            BenchmarkConstans.REVISION_IS_MINOR));
+            isMinor = BooleanType.instance.compose(value
+                    .get(BenchmarkConstans.REVISION_ISMINOR_COLUMN_NAME));
         }
         String text = BenchmarkConstans.STRING_NULL;
-        ByteBuffer textBB = value.get(BenchmarkConstans.REVISION_TEXT);
+        ByteBuffer textBB = value
+                .get(BenchmarkConstans.REVISION_TEXT_COLUMN_NAME);
         if (null != textBB) {
             text = UTF8Type.instance.compose(textBB);
         }
 
         Integer contributorId = -1;
         ByteBuffer contributorIdBB = value
-                .get(BenchmarkConstans.CONTRIBUTOR_ID);
+                .get(BenchmarkConstans.CONTRIBUTOR_ID_COLUMN_NAME);
         if (null != contributorIdBB) {
             contributorId = Int32Type.instance.compose(contributorIdBB);
         }
         String username = BenchmarkConstans.STRING_NULL;
         ByteBuffer usernameBB = value
-                .get(BenchmarkConstans.CONTRIBUTOR_USER_NAME);
+                .get(BenchmarkConstans.CONTRIBUTOR_USERNAME_COLUMN_NAME);
         if (null != usernameBB) {
             username = UTF8Type.instance.compose(usernameBB);
         }
         Boolean isAnonymous = false;
         ByteBuffer isAnonymousBB = value
-                .get(BenchmarkConstans.CONTRIBUTOR_IS_ANONYMOUS);
+                .get(BenchmarkConstans.CONTRIBUTOR_ISANONYMOUS_COLUMN_NAME);
         if (null != isAnonymousBB) {
             isAnonymous = BooleanType.instance.compose(isAnonymousBB);
         }
         ContributorWritable contributorWritable = new ContributorWritable(
                 contributorId, username, isAnonymous);
         String redirection = BenchmarkConstans.STRING_NULL;
-        if (null != value.get(BenchmarkConstans.REVISION_REDIRECTION)) {
-            redirection = UTF8Type.instance.compose(value.get(
-
-            BenchmarkConstans.REVISION_REDIRECTION));
+        if (null != value
+                .get(BenchmarkConstans.REVISION_REDIRECTION_COLUMN_NAME)) {
+            redirection = UTF8Type.instance.compose(value
+                    .get(BenchmarkConstans.REVISION_REDIRECTION_COLUMN_NAME));
         }
         context.write(new Text(pageWritable.getTitle()),
                 new RevisionPageCounter(title, BenchmarkConstans.DATE_NULL,
