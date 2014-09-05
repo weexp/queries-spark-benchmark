@@ -1,17 +1,5 @@
 package com.stratio.deep.benchmark.cassandra.spark.datastaxt;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import org.apache.spark.SparkConf;
-import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
-import org.hyperic.sigar.SigarException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.datastax.spark.connector.CassandraJavaUtil;
 import com.datastax.spark.connector.CassandraRow;
 import com.datastax.spark.connector.rdd.CassandraJavaRDD;
@@ -20,6 +8,17 @@ import com.stratio.deep.benchmark.cassandra.spark.groupby.FunctionDatastaxtGroup
 import com.stratio.deep.benchmark.cassandra.spark.groupby.FunctionDatastaxtMapRevGroupBy;
 import com.stratio.deep.benchmark.cassandra.spark.join.FunctionDatastaxtMapRevJoin;
 import com.stratio.deep.benchmark.cassandra.spark.join.FunctionMapDatastaxtPageJoin;
+import org.apache.spark.SparkConf;
+import org.apache.spark.SparkContext;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import org.hyperic.sigar.SigarException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  * Created by ParadigmaTecnologico on 22/05/2014.
@@ -67,6 +66,7 @@ public class RunDataStaxtBench {
                             "revision_isminor", "revision_redirection",
                             "revision_timestamp");
 
+
             // Creating the RDD for PageCounts
             CassandraJavaRDD<CassandraRow> rddPage = CassandraJavaUtil
                     .javaFunctions(sc).cassandraTable(keyspace, table2);
@@ -88,7 +88,7 @@ public class RunDataStaxtBench {
 
             File FileTimes_F = new File(pathTimes + "/Filter.txt");
             FileWriter TextOutTime_F = new FileWriter(FileTimes_F, true);
-            TextOutTime_F.write("RESPONSE TIME FILTER: " + tT + " ");
+            TextOutTime_F.write("RESPONSE TIME FILTER con tabla Revision y CON proyeccion: " + tT + "\n");
             TextOutTime_F.close();
 
             time_start = System.currentTimeMillis(); // Start Crono
@@ -108,7 +108,7 @@ public class RunDataStaxtBench {
 
             File FileTimes_J = new File(pathTimes + "/Join.txt");
             FileWriter TextOutTime_J = new FileWriter(FileTimes_J, true);
-            TextOutTime_J.write("RESPONSE TIME JOIN: " + tT + " ");
+            TextOutTime_J.write("RESPONSE TIME JOIN: " + tT + "\n");
             TextOutTime_J.close();
 
         } finally {
@@ -136,7 +136,7 @@ public class RunDataStaxtBench {
 
         File FileTimes_G = new File(pathTimes + "/Group.txt");
         FileWriter TextOutTime_G = new FileWriter(FileTimes_G, true);
-        TextOutTime_G.write("RESPONSE TIME GROUPBY: " + tT + " ");
+        TextOutTime_G.write("RESPONSE TIME GROUPBY: " + tT  + "\n");
         TextOutTime_G.close();
 
     }

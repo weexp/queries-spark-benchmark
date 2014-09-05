@@ -1,20 +1,5 @@
 package com.stratio.deep.benchmark.cassandra.spark;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.spark.SparkConf;
-import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
-import org.hyperic.sigar.SigarException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.stratio.deep.benchmark.cassandra.spark.filter.FunctionFilterPageCount;
 import com.stratio.deep.benchmark.cassandra.spark.groupby.FunctionGroupByRev;
 import com.stratio.deep.benchmark.cassandra.spark.groupby.FunctionMapRevGroupBy;
@@ -25,6 +10,20 @@ import com.stratio.deep.config.ICassandraDeepJobConfig;
 import com.stratio.deep.context.CassandraDeepSparkContext;
 import com.stratio.deep.entity.Cells;
 import com.stratio.deep.rdd.CassandraJavaRDD;
+import org.apache.spark.SparkConf;
+import org.apache.spark.SparkContext;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import org.hyperic.sigar.SigarException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by ParadigmaTecnologico on 22/05/2014.
@@ -95,55 +94,11 @@ public class RunBench {
             ICassandraDeepJobConfig<Cells> configPage = CassandraConfigFactory
                     .create().host(CASSANDRAHOST).rpcPort(cassandraPort)
                     .keyspace(keyspace).table(table2).bisectFactor(bisecFactor)
-                    .initialize();
+                    .initialize().pageSize(10000);
 
             // Creating the RDD for PageCounts
             CassandraJavaRDD<Cells> rddPage = deepContext
                     .cassandraJavaRDD(configPage);
-
-            // FILTER
-            // for (int i = 0; i < runs; i++) {
-            time_start = System.currentTimeMillis(); // Start Crono
-
-            // Function Filter: FunctionFilterPageCount -> count pages in a
-            // limit times
-            JavaRDD<Cells> filtrado = rddPage
-                    .filter(new FunctionFilterPageCount());
-
-            System.out.println("\r\n Resultados Filter " + filtrado.count()
-                    + "\r\n");
-            // Configuration and initialization for PageCounts with secondary
-            // index
-            time_end = System.currentTimeMillis(); // End crono
-            tT = (time_end - time_start) / 1000d;
-            long timeS2IStart = System.currentTimeMillis();
-            ICassandraDeepJobConfig<Cells> configPageWithFilter = CassandraConfigFactory
-                    .create()
-                    .rpcPort(cassandraPort)
-                    .keyspace(keyspace)
-                    .table(table2)
-                    .bisectFactor(bisecFactor)
-                    .filterByField(
-                            "lucene",
-                            "{filter : {type : \"range\",field : \"pagecounts\", lower : 199 , include_lower : true , upper : 201 , include_upper : false }}")
-                    .pageSize(10000).initialize();
-
-            // Creating the RDD for PageCounts with secondary index
-
-            CassandraJavaRDD<Cells> rddPageWithFilter = deepContext
-                    .cassandraJavaRDD(configPageWithFilter);
-            System.out.println("Secondary Index Filter "
-                    + rddPageWithFilter.count());
-            long timeS2IStop = System.currentTimeMillis();
-            // data[i] = tT;
-            // }
-
-            File FileTimes_F = new File(pathF);
-            FileWriter TextOutTime_F = new FileWriter(FileTimes_F, true);
-            TextOutTime_F.write("RESPONSE TIME FILTER: " + tT + " ");
-            TextOutTime_F.write("RESPONSE TIME FILTER WITH 2I: "
-                    + (timeS2IStop - timeS2IStart) / 1000d + " ");
-            TextOutTime_F.close();
 
             ICassandraDeepJobConfig<Cells> configRev = CassandraConfigFactory
                     .create()
@@ -157,13 +112,64 @@ public class RunBench {
                             "page_isredirect", "page_ns", "page_restrictions",
                             "page_title", "revision_id", "revision_isminor",
                             "revision_redirection", "revision_timestamp")
-                    .bisectFactor(bisecFactor).initialize();
+                    .bisectFactor(bisecFactor).initialize().pageSize(10000);
 
             // Creating the RDD for Revision
             CassandraJavaRDD<Cells> rddRev = deepContext
                     .cassandraJavaRDD(configRev);
 
-            launchGroupByJob(rddRev, slaves, CASSANDRAHOST, pathFileG, pathG);
+            // FILTER
+            // for (int i = 0; i < runs; i++) {
+
+            time_start = System.currentTimeMillis(); // Start Crono
+
+            // Function Filter: FunctionFilterPageCount -> count pages in a
+            // limit times
+            JavaRDD<Cells> filtrado = rddPage
+                    .filter(new FunctionFilterPageCount());
+            long resultados = filtrado.count();
+
+            System.out.println("\r\n Resultados Filter con pagesize 10.000 " + resultados
+                    + "\r\n");
+            // Configuration and initialization for PageCounts with secondary
+            // index
+            time_end = System.currentTimeMillis(); // End crono
+            tT = (time_end - time_start) / 1000d;
+
+            long timeS2IStart = System.currentTimeMillis();
+            ICassandraDeepJobConfig<Cells> configPageWithFilter = CassandraConfigFactory
+                    .create()
+                    .rpcPort(cassandraPort)
+                    .keyspace(keyspace)
+                    .table(table2)
+                    .bisectFactor(bisecFactor)
+                    .filterByField(
+                            "lucene",
+                            //"{filter : {type : \"range\",field : \"page_id\", lower : 18295009 , include_lower : true , upper : 18295020 , include_upper : false }}")
+                            "{filter : {type : \"range\",field : \"pagecounts\", lower : 199 , include_lower : true , upper : 201 , include_upper : false }}")
+                    .pageSize(10000).initialize();
+
+            // Creating the RDD for PageCounts with secondary index
+
+            CassandraJavaRDD<Cells> rddPageWithFilter = deepContext
+                    .cassandraJavaRDD(configPageWithFilter);
+            long resultadosIndex =rddPageWithFilter.count();
+            System.out.println("Secondary Index Filter "
+                    + resultadosIndex);
+            long timeS2IStop = System.currentTimeMillis();
+            // data[i] = tT;
+            // }
+
+            File FileTimes_F = new File(pathF);
+            FileWriter TextOutTime_F = new FileWriter(FileTimes_F, true);
+            TextOutTime_F.write("RESPONSE TIME FILTER con "+ bisecFactor+ ": " + tT  + "\n");
+            TextOutTime_F.write("RESPONSE TIME FILTER WITH 2I con "+ bisecFactor+ ": "
+                    + (timeS2IStop - timeS2IStart) / 1000d  + "\n");
+            TextOutTime_F.close();
+
+            /**/
+
+            launchGroupByJob(rddRev, slaves, CASSANDRAHOST, pathFileG, pathG, bisecFactor);
 
             // Calculate max
             // Bench benchMaxF = new Bench();
@@ -203,6 +209,7 @@ public class RunBench {
 
             // JOIN
             // for (int i = 0; i < runs; i++) {
+
             time_start = System.currentTimeMillis(); // Start Crono
 
             // Function Join
@@ -235,7 +242,7 @@ public class RunBench {
 
             File FileTimes_J = new File(pathJ);
             FileWriter TextOutTime_J = new FileWriter(FileTimes_J, true);
-            TextOutTime_J.write("RESPONSE TIME JOIN: " + tT + " ");
+            TextOutTime_J.write("RESPONSE TIME JOIN: "+ bisecFactor+ ": " + tT  + "\n");
             TextOutTime_J.close();
 
             // Calculate max
@@ -262,6 +269,8 @@ public class RunBench {
             // FileJoin fileJoin_S = new FileJoin(slaves.get(i), pathFileJ);
             // fileJoin_S.stop();
             // }
+
+
         } finally {
             deepContext.stop();
         }
@@ -271,7 +280,7 @@ public class RunBench {
 
     private static void launchGroupByJob(CassandraJavaRDD<Cells> rddRev,
             List<String> slaves, String CASSANDRAHOST, String pathFileG,
-            String pathG) throws IOException {
+            String pathG, int bisecFactor) throws IOException {
 
         // initialization files Master for Group
         // FileGroup fileGroup_M = new FileGroup(CASSANDRAHOST, pathFileG);
@@ -311,7 +320,7 @@ public class RunBench {
 
         File FileTimes_G = new File(pathG);
         FileWriter TextOutTime_G = new FileWriter(FileTimes_G, true);
-        TextOutTime_G.write("RESPONSE TIME GROUPBY: " + tT + " ");
+        TextOutTime_G.write("RESPONSE TIME GROUPBY: "+ bisecFactor+ ": " + tT  + "\n");
         TextOutTime_G.close();
         // Calculate max
         // Bench benchMaxG = new Bench();
