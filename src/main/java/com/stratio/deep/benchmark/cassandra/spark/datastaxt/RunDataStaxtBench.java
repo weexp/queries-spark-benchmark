@@ -1,13 +1,9 @@
 package com.stratio.deep.benchmark.cassandra.spark.datastaxt;
 
-import com.datastax.spark.connector.CassandraJavaUtil;
-import com.datastax.spark.connector.CassandraRow;
-import com.datastax.spark.connector.rdd.CassandraJavaRDD;
-import com.stratio.deep.benchmark.cassandra.spark.filter.FunctionFilterDatastaxtPageCount;
-import com.stratio.deep.benchmark.cassandra.spark.groupby.FunctionDatastaxtGroupByRev;
-import com.stratio.deep.benchmark.cassandra.spark.groupby.FunctionDatastaxtMapRevGroupBy;
-import com.stratio.deep.benchmark.cassandra.spark.join.FunctionDatastaxtMapRevJoin;
-import com.stratio.deep.benchmark.cassandra.spark.join.FunctionMapDatastaxtPageJoin;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
@@ -16,9 +12,14 @@ import org.hyperic.sigar.SigarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import com.datastax.spark.connector.CassandraJavaUtil;
+import com.datastax.spark.connector.CassandraRow;
+import com.datastax.spark.connector.rdd.CassandraJavaRDD;
+import com.stratio.deep.benchmark.cassandra.spark.filter.FunctionFilterDatastaxtPageCount;
+import com.stratio.deep.benchmark.cassandra.spark.groupby.FunctionDatastaxtGroupByRev;
+import com.stratio.deep.benchmark.cassandra.spark.groupby.FunctionDatastaxtMapRevGroupBy;
+import com.stratio.deep.benchmark.cassandra.spark.join.FunctionDatastaxtMapRevJoin;
+import com.stratio.deep.benchmark.cassandra.spark.join.FunctionMapDatastaxtPageJoin;
 
 /**
  * Created by ParadigmaTecnologico on 22/05/2014.
@@ -35,6 +36,7 @@ public class RunDataStaxtBench {
         final String keyspace = args[1];
         final String table1 = args[2];
         final String table2 = args[3];
+        final String splitSize = args[4];
 
         double time_start, time_end, tT;
 
@@ -52,6 +54,7 @@ public class RunDataStaxtBench {
         sparkConf.setMaster(cluster);
         sparkConf.setAppName(jobName);
         sparkConf.set("spark.executor.memory", "16g");
+        sparkConf.set("spark.cassandra.input.split.size", splitSize);
         sparkConf.setJars(new String[] { pathJar });
 
         SparkContext sc = new SparkContext(sparkConf);
@@ -65,7 +68,6 @@ public class RunDataStaxtBench {
                             "page_restrictions", "page_title", "revision_id",
                             "revision_isminor", "revision_redirection",
                             "revision_timestamp");
-
 
             // Creating the RDD for PageCounts
             CassandraJavaRDD<CassandraRow> rddPage = CassandraJavaUtil
@@ -88,7 +90,9 @@ public class RunDataStaxtBench {
 
             File FileTimes_F = new File(pathTimes + "/Filter.txt");
             FileWriter TextOutTime_F = new FileWriter(FileTimes_F, true);
-            TextOutTime_F.write("RESPONSE TIME FILTER con tabla Revision y CON proyeccion: " + tT + "\n");
+            TextOutTime_F
+                    .write("RESPONSE TIME FILTER con tabla Revision y CON proyeccion: "
+                            + tT + "\n");
             TextOutTime_F.close();
 
             time_start = System.currentTimeMillis(); // Start Crono
@@ -136,7 +140,7 @@ public class RunDataStaxtBench {
 
         File FileTimes_G = new File(pathTimes + "/Group.txt");
         FileWriter TextOutTime_G = new FileWriter(FileTimes_G, true);
-        TextOutTime_G.write("RESPONSE TIME GROUPBY: " + tT  + "\n");
+        TextOutTime_G.write("RESPONSE TIME GROUPBY: " + tT + "\n");
         TextOutTime_G.close();
 
     }
